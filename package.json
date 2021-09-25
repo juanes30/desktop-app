@@ -1,9 +1,9 @@
 {
   "name": "station-desktop-app",
   "private": true,
-  "productName": "Station",
-  "version": "2.0.10",
-  "description": "Station",
+  "productName": "Cloudworkz",
+  "version": "2.0.9",
+  "description": "Cloudworkz",
   "homepage": "https://getstation.com",
   "author": {
     "name": "Joël Charles",

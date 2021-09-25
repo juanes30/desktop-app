@@ -4,12 +4,12 @@ import * as React from 'react';
 import injectSheet from 'react-jss';
 
 export interface Classes {
-  footer: string,
-  link: string,
+  footer: string;
+  link: string;
 }
 
 export interface Props {
-  classes?: Classes,
+  classes?: Classes;
 }
 
 const styles = (theme: Theme) => ({
@@ -20,14 +20,14 @@ const styles = (theme: Theme) => ({
     bottom: 0,
     left: 0,
     color: theme.colors.gray.middle,
-    fontSize: 11,
+    fontSize: 11
   },
   link: {
     marginLeft: 10,
     fontWeight: 600,
     textDecoration: 'underline',
-    cursor: 'pointer',
-  },
+    cursor: 'pointer'
+  }
 });
 
 @injectSheet(styles)
@@ -37,15 +37,19 @@ export default class AboutWindowFooter extends React.PureComponent<Props, {}> {
 
     return (
       <footer className={classes!.footer}>
-        <p>2019 - Station</p>
+        <p>2021 - Cloudworkz</p>
         <a
           className={classes!.link}
           href="https://medium.com/getstation/your-way-of-working-belongs-to-the-stone-age-9ff64782f40"
           target="_blank"
         >
-          About Station
+          About Cloudworkz
         </a>
-        <a className={classes!.link} href="https://intercom.help/station" target="_blank">
+        <a
+          className={classes!.link}
+          href="https://intercom.help/station"
+          target="_blank"
+        >
           Support
         </a>
       </footer>

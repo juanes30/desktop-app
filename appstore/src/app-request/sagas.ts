@@ -4,10 +4,10 @@ import {
   setApplicationCreated,
   SUBMIT_APP_REQUEST,
   SubmitAppRequestAction,
-  Visibility,
+  Visibility
 } from '@src/app-request/duck';
 import { SagaIterator } from 'redux-saga';
-import { all, call, put, takeLatest } from 'redux-saga/effects';
+import { all, call, put, takeLatest, select } from 'redux-saga/effects';
 
 function* handleAppRequest(request: SubmitAppRequestAction): SagaIterator {
   if (request.visibility === Visibility.Public) {
@@ -20,13 +20,22 @@ function* handleAppRequest(request: SubmitAppRequestAction): SagaIterator {
       themeColor: appRequestData.themeColor,
       bxIconURL: appRequestData.logoURL,
       startURL: appRequestData.signinURL,
-      scope: appRequestData.scope,
+      scope: appRequestData.scope
     };
 
     try {
-      const { body } = yield call(window.bx.applications.requestPrivate, applicationRecipe);
+      const { body } = yield call(
+        window.bx.applications.requestPrivate,
+        applicationRecipe
+      );
+
       yield put(setApiResponse(ApiResponse.Done));
-      yield put(setApplicationCreated({ id: body.id, bxAppManifestURL: body.bxAppManifestURL }));
+      yield put(
+        setApplicationCreated({
+          id: body.id,
+          bxAppManifestURL: body.bxAppManifestURL
+        })
+      );
     } catch (e) {
       yield put(setApiResponse(ApiResponse.Error));
     }
@@ -34,7 +43,5 @@ function* handleAppRequest(request: SubmitAppRequestAction): SagaIterator {
 }
 
 export default function* main() {
-  yield all([
-    takeLatest(SUBMIT_APP_REQUEST, handleAppRequest),
-  ]);
+  yield all([takeLatest(SUBMIT_APP_REQUEST, handleAppRequest)]);
 }

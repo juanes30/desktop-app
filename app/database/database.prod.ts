@@ -9,7 +9,7 @@ import operatorsAliases from './operatorsAliases';
 const isRenderer = process.type === 'renderer';
 
 export const getDatabaseDir = () => {
-  const userDataPath = (isRenderer ? (remote.app) : app).getPath('userData');
+  const userDataPath = (isRenderer ? remote.app : app).getPath('userData');
   const p = path.join(userDataPath, 'db');
   mkdirp.sync(p);
   return p;
@@ -32,12 +32,12 @@ export const createEngine = () => {
     pool: {
       max: 5,
       min: 0,
-      idle: 3600,
+      idle: 3600
     },
     operatorsAliases,
     transactionType: Sequelize.Transaction.TYPES.IMMEDIATE,
     logging: () => {},
-    storage: dbPath,
+    storage: dbPath
   });
   log.debug(`Using database at ${dbPath}`);
 
@@ -48,12 +48,19 @@ export const createEngine = () => {
   if (!process.env.BX_CLI) {
     const { handleError } = require('../services/api/helpers');
     const { observer } = require('../services/lib/helpers');
-    require('../services/servicesManager').default.electronApp.addObserver(observer({
-      onBeforeQuit() {
-        e.query('PRAGMA optimize;');
-        e.query('VACUUM;');
-      },
-    }, 'db-quit')).catch(handleError());
+    require('../services/servicesManager')
+      .default.electronApp.addObserver(
+        observer(
+          {
+            onBeforeQuit() {
+              e.query('PRAGMA optimize;');
+              e.query('VACUUM;');
+            }
+          },
+          'db-quit'
+        )
+      )
+      .catch(handleError());
   }
 
   return e;

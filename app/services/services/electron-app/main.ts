@@ -16,7 +16,7 @@ function initProxyResolver() {
 
     // Use electron session resolver to detect proxy settings with a distant URL
     // If settings are detected, parse them then intialize a global tunnel for the whole app
-    defaultSession.resolveProxy('https://auth0.com/', (proxyDetected) => {
+    defaultSession.resolveProxy('https://auth0.com/', proxyDetected => {
       if (proxyDetected === 'DIRECT') {
         log.info('Proxy : no settings detected');
       } else {
@@ -25,14 +25,15 @@ function initProxyResolver() {
         const proxySettings = proxyDetected.split(' ')[1].split(':');
         globalTunnel.initialize({
           host: proxySettings[0],
-          port: Number(proxySettings[1]),
+          port: Number(proxySettings[1])
         });
       }
     });
   });
 }
 
-export class ElectronAppServiceImpl extends ElectronAppService implements RPC.Interface<ElectronAppService> {
+export class ElectronAppServiceImpl extends ElectronAppService
+  implements RPC.Interface<ElectronAppService> {
   private prepareQuitSubject: Subject<void>;
   private appCanQuit: boolean;
 
@@ -72,10 +73,7 @@ export class ElectronAppServiceImpl extends ElectronAppService implements RPC.In
     this.prepareQuitSubject.next();
 
     // Automatically resume quit after a while, if ever a problem occurred
-    setTimeout(
-      this.resumeQuit.bind(this),
-      RESUME_QUIT_RECOVERY_DELAY,
-    );
+    setTimeout(this.resumeQuit.bind(this), RESUME_QUIT_RECOVERY_DELAY);
   }
 
   async canResumeQuit() {
@@ -95,7 +93,7 @@ export class ElectronAppServiceImpl extends ElectronAppService implements RPC.In
   async getAppMetadata() {
     return {
       name: app.name,
-      version: app.getVersion(),
+      version: app.getVersion()
     };
   }
 
@@ -103,24 +101,24 @@ export class ElectronAppServiceImpl extends ElectronAppService implements RPC.In
     const subscriptions: Subscription[] = [];
 
     if (obs.onActivate) {
-      subscriptions.push(fromEvent(app, 'activate')
-        .subscribe(() => {
+      subscriptions.push(
+        fromEvent(app, 'activate').subscribe(() => {
           obs.onActivate!();
         })
       );
     }
 
     if (obs.onBeforeQuit) {
-      subscriptions.push(fromEvent(app, 'before-quit')
-        .subscribe(() => {
+      subscriptions.push(
+        fromEvent(app, 'before-quit').subscribe(() => {
           obs.onBeforeQuit!();
         })
       );
     }
 
     if (obs.onPrepareQuit) {
-      subscriptions.push(this.prepareQuitSubject.asObservable()
-        .subscribe(() => {
+      subscriptions.push(
+        this.prepareQuitSubject.asObservable().subscribe(() => {
           obs.onPrepareQuit!();
         })
       );
@@ -130,7 +128,7 @@ export class ElectronAppServiceImpl extends ElectronAppService implements RPC.In
   }
 
   private initPrepareQuit() {
-    app.on('before-quit', (event) => {
+    app.on('before-quit', event => {
       if (!this.appCanQuit) {
         event.preventDefault();
         // Trigger 'prepare-quit' observers

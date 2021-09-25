@@ -92,10 +92,10 @@ const overrideUserDataPath = () => {
     const userDataPath = path.join(app.getPath('appData'), process.env.OVERRIDE_USER_DATA_PATH);
     app.setPath('userData', userDataPath);
   } else if (!isPackaged) {
-    app.name = 'Station Dev';
+    app.name = 'Cloudworkz Dev';
     const userDataPath = path.join(
       app.getPath('appData'),
-      'Station Dev'
+      'Cloudworkz Dev'
     );
     app.setPath('userData', userDataPath);
   } else {
@@ -159,7 +159,7 @@ const init = () => {
   if (require('electron-squirrel-startup')) return;
 
   initWorker();
-
+  
   if (isPackaged) {
     const sourceMapSupport = require('source-map-support');
     sourceMapSupport.install();
@@ -168,7 +168,6 @@ const init = () => {
   }
 
   const bxAppMain = lazyBxAppMain();
-
   if (!isPackaged && !process.env.STATION_DISABLE_ECX) {
     app.on('session-created', s => {
       s.setPreloads([path.resolve(__dirname, 'static/preload/dev-preload.js')]);

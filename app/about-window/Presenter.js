@@ -12,7 +12,7 @@ import { isDarwin } from '../utils/process';
 const styles = theme => ({
   container: {
     height: '100%',
-    backgroundColor: theme.colors.gray.light,
+    backgroundColor: theme.colors.gray.light
   },
   body: {
     display: 'flex',
@@ -21,11 +21,13 @@ const styles = theme => ({
     height: '100%',
     padding: '40px 60px 60px 40px',
     color: theme.colors.gray.dark,
+    flexDirection: 'column',
+    alignItems: 'center'
   },
   content: {
     flex: 1,
     position: 'relative',
-    margin: '4px 100px 0 30px',
+    margin: '4px 100px 0 30px'
   },
   gradient: {
     position: 'absolute',
@@ -33,7 +35,7 @@ const styles = theme => ({
     right: 0,
     width: 100,
     height: '100%',
-    backgroundImage: props => props.themeGradient,
+    backgroundImage: props => props.themeGradient
   }
 });
 
@@ -49,12 +51,12 @@ class AboutWindowPresenter extends React.PureComponent {
     quitAndInstall: PropTypes.func.isRequired,
     themeColors: PropTypes.array.isRequired,
     appName: PropTypes.string,
-    appVersion: PropTypes.string,
+    appVersion: PropTypes.string
   };
 
   static defaultProps = {
-    releaseName: undefined,
-  }
+    releaseName: undefined
+  };
 
   render() {
     const { classes, themeColors } = this.props;
@@ -63,9 +65,9 @@ class AboutWindowPresenter extends React.PureComponent {
 
     return (
       <div className={classes.container}>
-        { isDarwin &&
+        {isDarwin && (
           <OSBar onClose={() => remote.getCurrentWindow().close()} />
-        }
+        )}
 
         <div className={classes.body}>
           <SVGInline svg={inlineSVG} />

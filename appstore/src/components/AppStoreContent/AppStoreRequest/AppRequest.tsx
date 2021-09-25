@@ -12,15 +12,21 @@ import {
   setApiResponse,
   Steps,
   submitAppRequest,
-  Visibility,
+  Visibility
 } from '@src/app-request/duck';
-import { getApiResponse, getApplicationCreated } from '@src/app-request/selectors';
+import {
+  getApiResponse,
+  getApplicationCreated
+} from '@src/app-request/selectors';
 import { ApplicationsAvailable } from '@src/graphql/queries';
 import { State } from '@src/state';
-import withCustomAppRequestMode, { WithCustomAppRequestModeStatus } from '@src/HOC/withCustomAppRequestMode';
-import withSearchString, { WithSearchStringProps } from '@src/HOC/withSearchString';
-import AppStorePageCategoryTitle
-  from '@src/components/AppStoreContent/AppStorePageCategoryTitle/AppStorePageCategoryTitle';
+import withCustomAppRequestMode, {
+  WithCustomAppRequestModeStatus
+} from '@src/HOC/withCustomAppRequestMode';
+import withSearchString, {
+  WithSearchStringProps
+} from '@src/HOC/withSearchString';
+import AppStorePageCategoryTitle from '@src/components/AppStoreContent/AppStorePageCategoryTitle/AppStorePageCategoryTitle';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
 import { isValidColor } from '@src/shared/validators/color-validator';
 import { isValidUrl } from '@src/shared/validators/url-validator';
@@ -31,47 +37,50 @@ import styles, { AppRequestClasses } from './styles';
 
 enum CustomAppFormOpenedVia {
   FloatingButton = 'floating-action-button',
-  EmptySearchButton = 'empty-search-action-button',
+  EmptySearchButton = 'empty-search-action-button'
 }
 
 interface IState {
-  isVisible: boolean,
-  appRequestVisibleOrigin?: CustomAppFormOpenedVia,
-  appRequestTooltipVisible: boolean,
-  step: Steps,
-  animAppearDirection: boolean,
-  animExitDirection: boolean,
-  request: Partial<AppRequestData>,
-  similarApplications?: ApplicationsAvailable[],
-  formSessionId?: string,
-  appNameError?: string,
-  errorInputColor?: string,
-  errorLogoURL?: string,
-  errorSigninURL?: string,
+  isVisible: boolean;
+  appRequestVisibleOrigin?: CustomAppFormOpenedVia;
+  appRequestTooltipVisible: boolean;
+  step: Steps;
+  animAppearDirection: boolean;
+  animExitDirection: boolean;
+  request: Partial<AppRequestData>;
+  similarApplications?: ApplicationsAvailable[];
+  formSessionId?: string;
+  appNameError?: string;
+  errorInputColor?: string;
+  errorLogoURL?: string;
+  errorSigninURL?: string;
 }
 
 interface IOwnProps {
-  classes?: AppRequestClasses,
-  onAddApplication: (applicationId: string, manifestURL: string) => void,
-  btnSize: number,
-  exitFlow: (isShouldRefetchCustomApps: boolean, appName?: string) => void,
+  classes?: AppRequestClasses;
+  onAddApplication: (applicationId: string, manifestURL: string) => void;
+  btnSize: number;
+  exitFlow: (isShouldRefetchCustomApps: boolean, appName?: string) => void;
 }
 
 interface IStateProps {
-  apiResponse?: ApiResponse,
-  applicationCreated?: ApplicationCreated,
+  apiResponse?: ApiResponse;
+  applicationCreated?: ApplicationCreated;
 }
 
 interface IDispatchProps {
-  submit: typeof submitAppRequest,
-  setApiResponse: typeof setApiResponse,
+  submit: typeof submitAppRequest;
+  setApiResponse: typeof setApiResponse;
 }
 
-type Props = IOwnProps & IStateProps & IDispatchProps & WithCustomAppRequestModeStatus & WithSearchStringProps;
+type Props = IOwnProps &
+  IStateProps &
+  IDispatchProps &
+  WithCustomAppRequestModeStatus &
+  WithSearchStringProps;
 
 @injectSheet(styles)
 class AppRequestImpl extends React.Component<Props, IState> {
-
   static defaultState = {
     isVisible: false,
     appRequestTooltipVisible: false,
@@ -90,8 +99,8 @@ class AppRequestImpl extends React.Component<Props, IState> {
       logoURL: '',
       signinURL: '',
       scope: '',
-      visibility: Visibility.Private,
-    },
+      visibility: Visibility.Private
+    }
   };
 
   constructor(props: Props) {
@@ -104,7 +113,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
     this.onAddApplication = this.onAddApplication.bind(this);
     this.onSubmitAppData = this.onSubmitAppData.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
-    this.handleInstallApplicationAfterAdd = this.handleInstallApplicationAfterAdd.bind(this);
+    this.handleInstallApplicationAfterAdd = this.handleInstallApplicationAfterAdd.bind(
+      this
+    );
   }
 
   // tslint:disable-next-line function-name
@@ -118,7 +129,7 @@ class AppRequestImpl extends React.Component<Props, IState> {
     if (nexProps.appRequestIsOpen && !isVisible) {
       this.setState({
         isVisible: true,
-        appRequestVisibleOrigin: CustomAppFormOpenedVia.EmptySearchButton,
+        appRequestVisibleOrigin: CustomAppFormOpenedVia.EmptySearchButton
       });
     }
   }
@@ -128,34 +139,33 @@ class AppRequestImpl extends React.Component<Props, IState> {
 
     this.setState({
       step: Steps.AppName,
-      request: { ...AppRequestImpl.defaultState.request, name: searchStringAfterEnterPress || '' },
-      formSessionId: uuid.v4(),
+      request: {
+        ...AppRequestImpl.defaultState.request,
+        name: searchStringAfterEnterPress || ''
+      },
+      formSessionId: uuid.v4()
     });
   }
 
   async onSetAppName(name: string) {
     this.setState({
       animAppearDirection: false,
-      animExitDirection: false,
+      animExitDirection: false
     });
     const similarApplications = await findApplicationByName(name.trim());
     if (similarApplications.length > 0) {
-      return this.setState(
-        (prevState, _) => ({
-          request: { ...prevState.request, name },
-          step: Steps.Disambiguation,
-          similarApplications,
-        })
-      );
+      return this.setState((prevState, _) => ({
+        request: { ...prevState.request, name },
+        step: Steps.Disambiguation,
+        similarApplications
+      }));
     }
 
-    this.setState(
-      (prevState, _) => ({
-        request: { ...prevState.request, name },
-        step: Steps.AppData,
-        similarApplications: undefined,
-      })
-    );
+    this.setState((prevState, _) => ({
+      request: { ...prevState.request, name },
+      step: Steps.AppData,
+      similarApplications: undefined
+    }));
   }
 
   onAddApplication(
@@ -168,19 +178,20 @@ class AppRequestImpl extends React.Component<Props, IState> {
     this.setState({ step: Steps.Exit });
   }
 
-  handleChangeThemeColor = (themeColor :string) => {
+  handleChangeThemeColor = (themeColor: string) => {
     const { errorInputColor } = this.state;
-    const error = errorInputColor && isValidColor(themeColor) ? '' : errorInputColor;
+    const error =
+      errorInputColor && isValidColor(themeColor) ? '' : errorInputColor;
 
     this.setState({
       ...this.state,
       request: {
         ...this.state.request,
-        themeColor,
+        themeColor
       },
-      errorInputColor: error,
+      errorInputColor: error
     });
-  }
+  };
 
   handleChangeLogoURL = (logoURL: string) => {
     const { errorLogoURL } = this.state;
@@ -190,13 +201,13 @@ class AppRequestImpl extends React.Component<Props, IState> {
       ...this.state,
       request: {
         ...this.state.request,
-        logoURL,
+        logoURL
       },
-      errorLogoURL: error,
+      errorLogoURL: error
     });
-  }
+  };
 
-  handleChangeSigninUrl = (signinURL :string) => {
+  handleChangeSigninUrl = (signinURL: string) => {
     const { errorSigninURL } = this.state;
     const error = errorSigninURL && isValidUrl(signinURL) ? '' : errorSigninURL;
 
@@ -204,16 +215,21 @@ class AppRequestImpl extends React.Component<Props, IState> {
       ...this.state,
       request: {
         ...this.state.request,
-        signinURL,
+        signinURL
       },
-      errorSigninURL: error,
+      errorSigninURL: error
     });
-  }
+  };
 
   onSubmitAppData() {
     const { themeColor, logoURL, signinURL, visibility } = this.state.request;
     const { submit } = this.props;
-    const { errorInputColor, errorLogoURL, errorSigninURL } = appDataValidator(themeColor!, logoURL!, signinURL!, visibility!);
+    const { errorInputColor, errorLogoURL, errorSigninURL } = appDataValidator(
+      themeColor!,
+      logoURL!,
+      signinURL!,
+      visibility!
+    );
 
     this.props.setApiResponse(ApiResponse.Pending);
 
@@ -222,7 +238,7 @@ class AppRequestImpl extends React.Component<Props, IState> {
         ...this.state,
         errorInputColor,
         errorLogoURL,
-        errorSigninURL,
+        errorSigninURL
       });
     }
 
@@ -230,8 +246,14 @@ class AppRequestImpl extends React.Component<Props, IState> {
 
     this.setState(
       (prevState, _) => ({
-        request: { ...prevState.request, logoURL, signinURL, themeColor, scope },
-        animExitDirection: true,
+        request: {
+          ...prevState.request,
+          logoURL,
+          signinURL,
+          themeColor,
+          scope
+        },
+        animExitDirection: true
       }),
       () => {
         this.setState({ step: Steps.Confirmation });
@@ -246,9 +268,10 @@ class AppRequestImpl extends React.Component<Props, IState> {
     animExitDirection: boolean,
     backToStep: Steps
   ) => {
-    return this.setState({ animAppearDirection, animExitDirection },
-      () => this.setState({ step: backToStep }));
-  }
+    return this.setState({ animAppearDirection, animExitDirection }, () =>
+      this.setState({ step: backToStep })
+    );
+  };
 
   onCancel(backToStep: Steps) {
     switch (backToStep) {
@@ -257,8 +280,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
       case Steps.Disambiguation:
         return this.updateAnimationAndStepStates(true, false, backToStep);
       default:
-        this.setState({ animExitDirection: true },
-          () => this.setState({ step: backToStep }));
+        this.setState({ animExitDirection: true }, () =>
+          this.setState({ step: backToStep })
+        );
     }
   }
 
@@ -271,31 +295,38 @@ class AppRequestImpl extends React.Component<Props, IState> {
   handleInstallApplicationAfterAdd() {
     const { onAddApplication, applicationCreated } = this.props;
     this.props.exitFlow(true);
-    onAddApplication(applicationCreated!.id, applicationCreated!.bxAppManifestURL);
+    onAddApplication(
+      applicationCreated!.id,
+      applicationCreated!.bxAppManifestURL
+    );
     location.reload();
   }
 
   getCurrentStep = () => {
     const { apiResponse } = this.props;
-    const { request: { name, logoURL, visibility, themeColor }, step, similarApplications } = this.state;
+    const {
+      request: { name, logoURL, visibility, themeColor },
+      step,
+      similarApplications
+    } = this.state;
 
     switch (step) {
       case Steps.AppName:
         return (
-            <CSSTransition
-              key={Steps.AppName}
-              in={true}
-              appear={true}
-              timeout={500}
-              classNames="fade"
-            >
-              <ComponentSteps.AppName
-                name={name!}
-                onNext={this.onSetAppName}
-                animAppearDirection={this.state.animAppearDirection}
-                animExitDirection={this.state.animExitDirection}
-              />
-            </CSSTransition>
+          <CSSTransition
+            key={Steps.AppName}
+            in={true}
+            appear={true}
+            timeout={500}
+            classNames="fade"
+          >
+            <ComponentSteps.AppName
+              name={name!}
+              onNext={this.onSetAppName}
+              animAppearDirection={this.state.animAppearDirection}
+              animExitDirection={this.state.animExitDirection}
+            />
+          </CSSTransition>
         );
       case Steps.Disambiguation:
         return (
@@ -311,7 +342,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
               similarApplications={similarApplications!}
               onCancel={() => this.onCancel(Steps.AppName)}
               onAddApplication={this.onAddApplication}
-              onNext={() => this.updateAnimationAndStepStates(true, true, Steps.AppData)}
+              onNext={() =>
+                this.updateAnimationAndStepStates(true, true, Steps.AppData)
+              }
               animAppearDirection={this.state.animAppearDirection}
               animExitDirection={this.state.animExitDirection}
             />
@@ -338,14 +371,15 @@ class AppRequestImpl extends React.Component<Props, IState> {
               handleChangeThemeColor={this.handleChangeThemeColor}
               handleChangeLogoURL={this.handleChangeLogoURL}
               handleChangeSigninUrl={this.handleChangeSigninUrl}
-              onCancel={() => similarApplications ?
-                this.onCancel(Steps.Disambiguation) : this.onCancel(Steps.AppName)
+              onCancel={() =>
+                similarApplications
+                  ? this.onCancel(Steps.Disambiguation)
+                  : this.onCancel(Steps.AppName)
               }
               onSubmit={this.onSubmitAppData}
               animExitDirection={this.state.animExitDirection}
             />
           </CSSTransition>
-
         );
       case Steps.Confirmation:
         return (
@@ -366,11 +400,11 @@ class AppRequestImpl extends React.Component<Props, IState> {
               installApplicationAfterAdd={this.handleInstallApplicationAfterAdd}
             />
           </CSSTransition>
-
         );
-      default: return <React.Fragment/>;
+      default:
+        return <React.Fragment />;
     }
-  }
+  };
 
   render() {
     const { classes } = this.props;
@@ -378,12 +412,10 @@ class AppRequestImpl extends React.Component<Props, IState> {
 
     return (
       <div className={classes!.stepperContainer}>
-        {step !== Steps.Confirmation && <AppStorePageCategoryTitle
-          title={'Add a custom app'}
-        />}
-        <TransitionGroup>
-          {this.getCurrentStep()}
-        </TransitionGroup>
+        {step !== Steps.Confirmation && (
+          <AppStorePageCategoryTitle title={'Add a custom app'} />
+        )}
+        <TransitionGroup>{this.getCurrentStep()}</TransitionGroup>
       </div>
     );
   }
@@ -392,15 +424,19 @@ class AppRequestImpl extends React.Component<Props, IState> {
 const AppRequest = connect<IStateProps, IDispatchProps, IOwnProps>(
   (state: State) => ({
     apiResponse: getApiResponse(state),
-    applicationCreated: getApplicationCreated(state),
+    applicationCreated: getApplicationCreated(state)
   }),
-  (dispatch: Dispatch) => bindActionCreators(
-    {
-      submit: submitAppRequest,
-      setApiResponse,
-    },
-    dispatch,
-  ),
+  (dispatch: Dispatch) =>
+    bindActionCreators(
+      {
+        submit: submitAppRequest,
+        setApiResponse
+      },
+      dispatch
+    )
 )(AppRequestImpl);
 
-export default compose(withCustomAppRequestMode, withSearchString)(AppRequest);
+export default compose(
+  withCustomAppRequestMode,
+  withSearchString
+)(AppRequest);

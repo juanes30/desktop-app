@@ -10,7 +10,11 @@ import HTML5Backend from 'react-dnd-html5-backend';
 import { isFullScreen, isKbdShortcutsOverlayVisible } from '../app/selectors';
 import ShortcutsOverlay from '../app/components/ShortcutsOverlay';
 import LoadingScreen from '../app/containers/LoadingScreen';
-import { mainAppReady, setKbdShortcutsVisibility, toggleMaximize } from '../app/duck';
+import {
+  mainAppReady,
+  setKbdShortcutsVisibility,
+  toggleMaximize
+} from '../app/duck';
 import ApplicationScene from '../applications/ApplicationScene';
 import TransparentTitleBar from '../components/TransparentTitleBar';
 import Dialogs from '../dialogs/Dialogs';
@@ -18,28 +22,38 @@ import DownloadToaster from '../dl-toaster/DownloadToaster';
 import Dock from '../dock/Dock';
 import Onboarding from '../onboarding/Onboarding';
 import { isVisible } from '../onboarding/selectors';
-import { getCursorIcon, getUISettingsActiveTabTitle, getUISettingsIsVisible } from '../ui/selectors';
+import {
+  getCursorIcon,
+  getUISettingsActiveTabTitle,
+  getUISettingsIsVisible
+} from '../ui/selectors';
 import SettingsOverlay from '../settings/Container';
 import SubdockItemDragLayer from '../subdock/components/SubdockItemDragLayer';
 import LocationFragmentUpdater from './LocationFragmentUpdater';
 
 @DragDropContext(HTML5Backend)
 @connect(
-  (state) => ({
+  state => ({
     fullScreen: isFullScreen(state),
     kbdShortcutsOverlayVisibility: isKbdShortcutsOverlayVisible(state),
     isOnboardingVisible: isVisible(state),
     cursorIcon: getCursorIcon(state),
     settingsActiveTabTitle: getUISettingsActiveTabTitle(state),
-    isSettingsVisible: getUISettingsIsVisible(state),
+    isSettingsVisible: getUISettingsIsVisible(state)
   }),
-  (dispatch) => bindActionCreators({
-    onToggleMaximize: toggleMaximize,
-    onAppReady: mainAppReady,
-    setKbdShortcutsVisibility,
-    setSettingsActiveTabTitle: title => updateUI('settings', 'activeTabTitle', title),
-    setSettingsVisibility: isVisible => updateUI('settings', 'isVisible', isVisible),
-  }, dispatch)
+  dispatch =>
+    bindActionCreators(
+      {
+        onToggleMaximize: toggleMaximize,
+        onAppReady: mainAppReady,
+        setKbdShortcutsVisibility,
+        setSettingsActiveTabTitle: title =>
+          updateUI('settings', 'activeTabTitle', title),
+        setSettingsVisibility: isVisible =>
+          updateUI('settings', 'isVisible', isVisible)
+      },
+      dispatch
+    )
 )
 export default class App extends React.PureComponent {
   static propTypes = {
@@ -54,7 +68,7 @@ export default class App extends React.PureComponent {
     settingsActiveTabTitle: PropTypes.string,
     setSettingsActiveTabTitle: PropTypes.func,
     isSettingsVisible: PropTypes.bool,
-    setSettingsVisibility: PropTypes.func,
+    setSettingsVisibility: PropTypes.func
   };
 
   componentDidMount() {
@@ -75,45 +89,51 @@ export default class App extends React.PureComponent {
     // (temporarly) prevent the webviews from catching mouse events.
     //
     // Inspired from https://www.gyrocode.com/articles/how-to-detect-mousemove-event-over-iframe-element/
-    const handleWebviewsWithDragEvents = (disablePointer) => {
+    const handleWebviewsWithDragEvents = disablePointer => {
       const webviews = document.querySelectorAll('webview');
-      webviews.forEach((webview) => {
+      webviews.forEach(webview => {
         webview.style.pointerEvents = disablePointer ? 'none' : 'initial';
       });
     };
-    window.addEventListener('dragstart', () => handleWebviewsWithDragEvents(true));
-    window.addEventListener('dragend', () => handleWebviewsWithDragEvents(false));
+    window.addEventListener('dragstart', () =>
+      handleWebviewsWithDragEvents(true)
+    );
+    window.addEventListener('dragend', () =>
+      handleWebviewsWithDragEvents(false)
+    );
   }
 
   render() {
     const { fullScreen, isOnboardingVisible, cursorIcon } = this.props;
 
     return (
-      <div className={classNames('l-container', `cursor-${cursorIcon}`, { 'l-fullscreen': fullScreen })}>
+      <div
+        className={classNames('l-container', `cursor-${cursorIcon}`, {
+          'l-fullscreen': fullScreen
+        })}
+      >
         <TransparentTitleBar onDoubleClick={this.props.onToggleMaximize} />
         <div className="l-appcontainer">
           <Dock />
           <ApplicationScene />
         </div>
-        {isOnboardingVisible &&
-          <Onboarding />
-        }
+        {isOnboardingVisible && <Onboarding />}
         <DownloadToaster />
         <Dialogs />
         <div id="portal-application-scene" />
 
-        {this.props.kbdShortcutsOverlayVisibility &&
-        <ShortcutsOverlay
-          setVisibility={this.props.setKbdShortcutsVisibility}
-        />
-        }
-        {this.props.isSettingsVisible &&
-        <SettingsOverlay
-          activeTabTitle={this.props.settingsActiveTabTitle}
-          setActiveTabTitle={this.props.setSettingsActiveTabTitle}
-          setVisibility={this.props.setSettingsVisibility}
-        />
-        }
+        {this.props.kbdShortcutsOverlayVisibility && (
+          <ShortcutsOverlay
+            setVisibility={this.props.setKbdShortcutsVisibility}
+          />
+        )}
+        {this.props.isSettingsVisible && (
+          <SettingsOverlay
+            activeTabTitle={this.props.settingsActiveTabTitle}
+            setActiveTabTitle={this.props.setSettingsActiveTabTitle}
+            setVisibility={this.props.setSettingsVisibility}
+          />
+        )}
         <LoadingScreen />
 
         <SubdockItemDragLayer dragType={'DND_SUBDOCK_ITEM_FAVORITES'} />

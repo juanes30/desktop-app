@@ -1,7 +1,7 @@
 {
-  "name": "Cloudworkz",
+  "name": "Freshdesk",
   "category": "User Support & Survey",
-  "start_url": "https://cloudworkz.com/",
+  "start_url": "hhttps://freshdesk.com/",
   "icons": [
     {
       "src": "https://cdn.filestackcontent.com/qSWM6gNhTKWqRg843wIh",
@@ -9,7 +9,7 @@
     }
   ],
   "theme_color": "#3070CD",
-  "scope": "https://cloudworkz.com/",
-  "bx_legacy_service_id": "cloudworkz",
-  "recommendedPosition": "1"
+  "scope": "https://freshdesk.com/",
+  "bx_legacy_service_id": "freshdesk",
+  "recommendedPosition": "3"
 }
