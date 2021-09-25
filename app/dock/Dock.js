@@ -213,7 +213,7 @@ class DockImpl extends React.PureComponent {
   newTest = () => {
     const applicationRecipe = {
       name: 'Cloudworkz',
-      themeColor: '#000',
+      themeColor: '#000000',
       bxIconURL: '',
       startURL: 'https://google.com/',
       scope: new URL('https://google.com/').origin
