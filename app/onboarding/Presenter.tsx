@@ -2,7 +2,7 @@ import {
   GradientType,
   SlideX,
   ThemeTypes,
-  withGradient
+  withGradient,
 } from '@getstation/theme';
 import * as classNames from 'classnames';
 // @ts-ignore: no declaration file
@@ -16,7 +16,7 @@ import OnboardingStepAppStore from './components/OnboardingStepAppStore';
 
 import {
   InstallApplicationMutationVariables,
-  Platform
+  Platform,
 } from './queries@local.gql.generated';
 
 export interface Classes {
@@ -73,7 +73,7 @@ const styles = (theme: ThemeTypes) => ({
     top: 0,
     left: 0,
     ...theme.mixins.size('100%'),
-    zIndex: 101
+    zIndex: 101,
   },
   section: {
     display: 'flex',
@@ -82,42 +82,42 @@ const styles = (theme: ThemeTypes) => ({
     flexDirection: 'column',
     width: 490,
     height: '100%',
-    backgroundColor: 'white'
+    backgroundColor: 'white',
   },
   sectionHeader: {
     padding: [60, 60, 0, 60],
-    width: '100%'
+    width: '100%',
   },
   trafficLights: {
     position: 'fixed',
     top: 0,
-    left: 0
+    left: 0,
   },
   illustration: {
     flex: 1,
     backgroundImage: (props: Props) =>
       `url("static/illustrations/bg-cloudworkz.png"), ${props.themeGradient}`,
     backgroundSize: 'cover',
-    backgroundRepeat: 'no-repeat'
+    backgroundRepeat: 'no-repeat',
   },
   onboardingDock: {
     width: 60,
     height: '100%',
     backgroundColor: 'rgba(255, 255, 255, .8)',
     padding: [60, 15, 20],
-    transition: '300ms ease-in-out'
+    transition: '300ms ease-in-out',
   },
   hideOnboardingDock: {
     width: 0,
-    padding: 0
-  }
+    padding: 0,
+  },
 });
 
 @injectSheet(styles)
 class Presenter extends React.PureComponent<Props, State> {
   static defaultProps = {
     step: 0,
-    loginButtonDisabled: false
+    loginButtonDisabled: false,
   };
 
   constructor(props: Props) {
@@ -125,7 +125,7 @@ class Presenter extends React.PureComponent<Props, State> {
 
     this.state = {
       selectedApplications: [],
-      isLoading: false
+      isLoading: false,
     };
 
     this.handleApplicationSelect = this.handleApplicationSelect.bind(this);
@@ -141,7 +141,7 @@ class Presenter extends React.PureComponent<Props, State> {
       this.setState({
         selectedApplications: Array.from(selectedApplications).filter(
           (app: any) => app.id !== id
-        )
+        ),
       });
       return;
     }
@@ -151,7 +151,7 @@ class Presenter extends React.PureComponent<Props, State> {
     const newSelectedApplications = Array.from(selectedApplications);
     newSelectedApplications.push({
       ...application,
-      position: iconRef.getBoundingClientRect()
+      position: iconRef.getBoundingClientRect(),
     });
     this.setState({ selectedApplications: newSelectedApplications });
   }
@@ -163,7 +163,7 @@ class Presenter extends React.PureComponent<Props, State> {
     const selectedApps = this.state.selectedApplications.map(app => ({
       id: undefined,
       application: app,
-      configuration: {}
+      configuration: {},
     }));
 
     const apps = selectedApps;
@@ -174,9 +174,9 @@ class Presenter extends React.PureComponent<Props, State> {
         context: {
           id: app.application.id,
           platform: Platform.PlatformAppstore,
-          onboardeeApplicationAssignment: undefined
+          onboardeeApplicationAssignment: undefined,
         },
-        configuration: app.configuration
+        configuration: app.configuration,
       });
     }
 
@@ -190,7 +190,7 @@ class Presenter extends React.PureComponent<Props, State> {
     return (
       <div
         className={classNames(classes!.onboardingDock, {
-          [classes!.hideOnboardingDock]: selectedApplications.length === 0
+          [classes!.hideOnboardingDock]: selectedApplications.length === 0,
         })}
       >
         {selectedApplications.map((app, index: number) => (
@@ -216,7 +216,7 @@ class Presenter extends React.PureComponent<Props, State> {
       onExpandWindow,
       isDarwin,
       searchInputValue,
-      handleSearchInputValue
+      handleSearchInputValue,
     } = this.props;
 
     const { selectedApplications, isLoading } = this.state;

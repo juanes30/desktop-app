@@ -35,7 +35,9 @@ const loadWorker = () => {
     webContentsId: worker.webContents.id,
   });
 
-  (services.browserWindow as BrowserWindowManagerServiceImpl).setWorkerBrowserWindow(worker).catch(handleError());
+  (services.browserWindow as BrowserWindowManagerServiceImpl)
+    .setWorkerBrowserWindow(worker)
+    .catch(handleError());
 
   worker.loadURL(getUrlToLoad('index.html'));
 
@@ -89,14 +91,14 @@ const initWorker = () => {
  */
 const overrideUserDataPath = () => {
   if (process.env.OVERRIDE_USER_DATA_PATH) {
-    const userDataPath = path.join(app.getPath('appData'), process.env.OVERRIDE_USER_DATA_PATH);
+    const userDataPath = path.join(
+      app.getPath('appData'),
+      process.env.OVERRIDE_USER_DATA_PATH
+    );
     app.setPath('userData', userDataPath);
   } else if (!isPackaged) {
     app.name = 'Cloudworkz Dev';
-    const userDataPath = path.join(
-      app.getPath('appData'),
-      'Cloudworkz Dev'
-    );
+    const userDataPath = path.join(app.getPath('appData'), 'Cloudworkz Dev');
     app.setPath('userData', userDataPath);
   } else {
     // do not conflict with pre open-source data
@@ -111,7 +113,7 @@ const applyLogLevel = () => {
     logLevel = 'debug';
   }
   if (process.env.LOG_LEVEL) {
-    logLevel = (process.env.LOG_LEVEL as LevelOption);
+    logLevel = process.env.LOG_LEVEL as LevelOption;
   }
 
   log.transports.file.level = logLevel;
@@ -159,7 +161,7 @@ const init = () => {
   if (require('electron-squirrel-startup')) return;
 
   initWorker();
-  
+
   if (isPackaged) {
     const sourceMapSupport = require('source-map-support');
     sourceMapSupport.install();
@@ -188,7 +190,10 @@ if (!isPackaged) {
   process.on('uncaughtException', error => {
     const stack = error.stack ? error.stack : `${error.name}: ${error.message}`;
     const message = 'Uncaught Exception:\n' + stack;
-    dialog.showErrorBox('A JavaScript error occurred in the main process', message);
+    dialog.showErrorBox(
+      'A JavaScript error occurred in the main process',
+      message
+    );
   });
 } else {
   process.on('unhandledRejection', error => {
@@ -200,6 +205,8 @@ if (!isPackaged) {
   });
 }
 
-if (module.hot) { module.hot.accept(); }
+if (module.hot) {
+  module.hot.accept();
+}
 
 init();

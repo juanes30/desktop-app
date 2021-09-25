@@ -4,7 +4,7 @@ import {
   DEFAULT_SUNCALC,
   getGradient as gradient,
   QUICK_DURATION,
-  ThemeColorScheme
+  ThemeColorScheme,
 } from '@getstation/theme';
 import { app } from 'electron';
 // @ts-ignore: no declaration file
@@ -101,7 +101,7 @@ export const getMyCoordinates = memoize(
       )
       .then(({ latitude, longitude }: any) => ({
         latitude,
-        longitude
+        longitude,
       }))
       .catch((err: any) => {
         log.error('Getting public IP and location did not work\n', err);
@@ -109,7 +109,7 @@ export const getMyCoordinates = memoize(
       }),
   {
     promise: true,
-    maxAge: 60 * 60 * 1000
+    maxAge: 60 * 60 * 1000,
   }
 );
 
@@ -129,8 +129,8 @@ export const getSunCalc = memoize(
       suncalc = {
         ...suncalc,
         ...{
-          [key]: times[key].getHours() + times[key].getMinutes() / 60
-        }
+          [key]: times[key].getHours() + times[key].getMinutes() / 60,
+        },
       };
     });
 
@@ -181,7 +181,7 @@ export const getTransitionsMap = memoize((suncalc?: SunCalc) => {
     ['midday', midday * 3600],
     ['afternoon', afternoon * 3600],
     ['sunset', sunset * 3600],
-    ['night', night * 3600]
+    ['night', night * 3600],
   ]);
 });
 

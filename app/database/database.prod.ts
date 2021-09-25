@@ -32,12 +32,12 @@ export const createEngine = () => {
     pool: {
       max: 5,
       min: 0,
-      idle: 3600
+      idle: 3600,
     },
     operatorsAliases,
     transactionType: Sequelize.Transaction.TYPES.IMMEDIATE,
     logging: () => {},
-    storage: dbPath
+    storage: dbPath,
   });
   log.debug(`Using database at ${dbPath}`);
 
@@ -55,7 +55,7 @@ export const createEngine = () => {
             onBeforeQuit() {
               e.query('PRAGMA optimize;');
               e.query('VACUUM;');
-            }
+            },
           },
           'db-quit'
         )

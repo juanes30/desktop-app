@@ -7,8 +7,19 @@ import createCachedSelector from 're-reselect';
 import { createSelector } from 'reselect';
 import { getApplications } from '../applications/selectors';
 import { removeHashFromURL } from '../tab-webcontents/api';
-import { RecursiveImmutableList, RecursiveImmutableMap, StationState } from '../types';
-import { getLastActivityAt, getTabApplicationId, getTabId, getTabIsApplicationHome, getTabURL, isIgnoredForBackHistory } from './get';
+import {
+  RecursiveImmutableList,
+  RecursiveImmutableMap,
+  StationState,
+} from '../types';
+import {
+  getLastActivityAt,
+  getTabApplicationId,
+  getTabId,
+  getTabIsApplicationHome,
+  getTabURL,
+  isIgnoredForBackHistory,
+} from './get';
 import { StationTab, StationTabImmutable, StationTabsImmutable } from './types';
 import { getSubwindows } from '../subwindows/selectors';
 import { hasSubwindowsTabId } from '../subwindows/get';
@@ -24,7 +35,8 @@ export const getTabs = (state: StationState): StationTabsImmutable =>
 export const getTabsMappedByExactURL = createSelector(
   getTabs,
   tabs =>
-    tabs.filter(tab => typeof getTabURL(tab) === 'string')
+    tabs
+      .filter(tab => typeof getTabURL(tab) === 'string')
       .mapKeys((_k, tab) => getTabURL(tab))
 );
 
@@ -43,27 +55,40 @@ export const getTabsMappedByLooseURL = createSelector(
 // https://github.com/getstation/browserX/pull/484/commits/8c6680e3e3d5a8d9723f70cc2d302d64e41ffca2#diff-d3490afa09df7774e88088689177e952R25
 export const getTabsSortedByLastActivityAt = createSelector(
   getTabs,
-  tabs => tabs
-    .toList()
-    .sortBy((tab: StationTabImmutable) =>
-      tab.get('lastActivityAt', 0))
+  tabs =>
+    tabs
+      .toList()
+      .sortBy((tab: StationTabImmutable) => tab.get('lastActivityAt', 0))
 );
 
 export const getTabById = (state: StationState, tabId: string) =>
   getTabs(state).get(tabId);
 
 export const getTabsForApplication = createCachedSelector(
-  [getTabs, getSubwindows, (_state: StationState, applicationId: string) => applicationId],
-  (tabs, subwindows, applicationId) => tabs
-    .filter(t => getTabApplicationId(t) === applicationId)
-    .map(tab => tab.set('isDetached', hasSubwindowsTabId(subwindows as any, getTabId(tab))))
+  [
+    getTabs,
+    getSubwindows,
+    (_state: StationState, applicationId: string) => applicationId,
+  ],
+  (tabs, subwindows, applicationId) =>
+    tabs
+      .filter(t => getTabApplicationId(t) === applicationId)
+      .map(tab =>
+        tab.set(
+          'isDetached',
+          hasSubwindowsTabId(subwindows as any, getTabId(tab))
+        )
+      )
 )((_state: StationState, applicationId) => applicationId);
 
 /**
  * Returns a tab matching given URL, with the way it has been matched:
  * type: 'exact' means exact match, 'loose' means match with stripped URLs
  */
-export const getTabMatchingURL = (state: StationState, url: string): { type: 'exact' | 'loose', tab: StationTabImmutable } | null => {
+export const getTabMatchingURL = (
+  state: StationState,
+  url: string
+): { type: 'exact' | 'loose'; tab: StationTabImmutable } | null => {
   const exactMatch = getTabsMappedByExactURL(state).get(url);
   if (exactMatch) {
     return {
@@ -81,12 +106,17 @@ export const getTabMatchingURL = (state: StationState, url: string): { type: 'ex
   return null;
 };
 
-export const getTabIdMatchingURL = (state: StationState, url: string): { type: 'exact' | 'loose', tabId: string } | null => {
+export const getTabIdMatchingURL = (
+  state: StationState,
+  url: string
+): { type: 'exact' | 'loose'; tabId: string } | null => {
   const match = getTabMatchingURL(state, url);
-  return match ? {
-    type: match.type,
-    tabId: getTabId(match.tab),
-  } : null;
+  return match
+    ? {
+        type: match.type,
+        tabId: getTabId(match.tab),
+      }
+    : null;
 };
 
 export const getApplicationIdByTabId = (state: StationState, tabId: string) => {
@@ -107,7 +137,10 @@ export const getApplicationByTabId = createCachedSelector(
   }
 )((_state: StationState, tabId: string) => tabId);
 
-export const getTabIdsByApplicationId = (state: StationState, applicationId: string) => {
+export const getTabIdsByApplicationId = (
+  state: StationState,
+  applicationId: string
+) => {
   return getTabs(state)
     .filter(tab => getTabApplicationId(tab) === applicationId)
     .map(tab => getTabId(tab))
@@ -115,14 +148,19 @@ export const getTabIdsByApplicationId = (state: StationState, applicationId: str
 };
 
 export const getDuplicateTabsByURL = createSelector(
-  getTabs, getTabsMappedByExactURL,
+  getTabs,
+  getTabsMappedByExactURL,
   (tabs, tabsByURL) => {
     const filteredTabs = tabs.filter(tab => typeof getTabURL(tab) === 'string');
 
-    let result: RecursiveImmutableMap<Record<string, StationTab[]>> = Immutable.Map<string, any>() as any;
+    let result: RecursiveImmutableMap<
+      Record<string, StationTab[]>
+    > = Immutable.Map<string, any>() as any;
 
     tabsByURL.mapKeys((url: string) => {
-      const tabsWithSameURL = filteredTabs.filter(tab => getTabURL(tab) === url);
+      const tabsWithSameURL = filteredTabs.filter(
+        tab => getTabURL(tab) === url
+      );
       result = result.set(url, tabsWithSameURL.toList());
     });
 
@@ -131,31 +169,43 @@ export const getDuplicateTabsByURL = createSelector(
 );
 
 export const getDuplicateTabsByURLFilteredByApplicationId = createCachedSelector(
-  getDuplicateTabsByURL, (_state: StationState, applicationId: string) => applicationId,
-  (tabsGroupedByURL, applicationId) => tabsGroupedByURL
-    .filter(tabs => tabs.every(tab => getTabApplicationId(tab) === applicationId))
+  getDuplicateTabsByURL,
+  (_state: StationState, applicationId: string) => applicationId,
+  (tabsGroupedByURL, applicationId) =>
+    tabsGroupedByURL.filter(tabs =>
+      tabs.every(tab => getTabApplicationId(tab) === applicationId)
+    )
 )((_state: StationState, applicationId) => applicationId);
 
 export const getDuplicatedTabsCountByURL = createCachedSelector(
   getDuplicateTabsByURLFilteredByApplicationId,
-  tabsGroupedByURL => tabsGroupedByURL
-    .flatten(true)
-    .toList()
-    .countBy(tab => tab.get('url'))
-    .reduce((accumulator: number, value: number) => accumulator + value - 1, 0)
+  tabsGroupedByURL =>
+    tabsGroupedByURL
+      .flatten(true)
+      .toList()
+      .countBy(tab => tab.get('url'))
+      .reduce(
+        (accumulator: number, value: number) => accumulator + value - 1,
+        0
+      )
 )((_state: StationState, applicationId) => applicationId);
 
 export const getDuplicatedTabsCountByTitle = createCachedSelector(
   getDuplicateTabsByURLFilteredByApplicationId,
-  tabsGroupedByURL => tabsGroupedByURL
-    .flatten(true)
-    .toList()
-    .countBy(tab => tab.get('title'))
-    .reduce((accumulator: number, value: number) => accumulator + value - 1, 0)
+  tabsGroupedByURL =>
+    tabsGroupedByURL
+      .flatten(true)
+      .toList()
+      .countBy(tab => tab.get('title'))
+      .reduce(
+        (accumulator: number, value: number) => accumulator + value - 1,
+        0
+      )
 )((_state: StationState, applicationId) => applicationId);
 
 export const getTabInactivityTimesInDays = createCachedSelector(
-  getTabsSortedByLastActivityAt, (_state: StationState, applicationId: string) => applicationId,
+  getTabsSortedByLastActivityAt,
+  (_state: StationState, applicationId: string) => applicationId,
   (tabsSorted: RecursiveImmutableList<StationTab[]>, applicationId) =>
     tabsSorted
       .filter(tab => getTabApplicationId(tab) === applicationId)
@@ -175,25 +225,28 @@ export const getMedianTabInactivityTimeInDays = createCachedSelector(
 )((_state: StationState, applicationId) => applicationId);
 
 export const getHomeTabsWithApplications = createSelector(
-  getTabs, getApplications,
-  (tabs, applications) => tabs
-    .filter(
-      (tab: StationTabImmutable) =>
-        applications.has(getTabApplicationId(tab)) &&
-        getTabIsApplicationHome(tab)
-    )
-    .map(tab => [tab, applications.get(getTabApplicationId(tab))])
-    .toList()
+  getTabs,
+  getApplications,
+  (tabs, applications) =>
+    tabs
+      .filter(
+        (tab: StationTabImmutable) =>
+          applications.has(getTabApplicationId(tab)) &&
+          getTabIsApplicationHome(tab)
+      )
+      .map(tab => [tab, applications.get(getTabApplicationId(tab))])
+      .toList()
 );
 
 export const getTabsOnlyWithApplications = createSelector(
   [getTabs, getApplications],
-  (tabs, applications) => tabs
-    .filter(
-      (tab: StationTabImmutable) =>
-        applications.has(getTabApplicationId(tab)) &&
-        !getTabIsApplicationHome(tab)
-    )
-    .map(tab => [tab, applications.get(getTabApplicationId(tab))])
-    .toList()
+  (tabs, applications) =>
+    tabs
+      .filter(
+        (tab: StationTabImmutable) =>
+          applications.has(getTabApplicationId(tab)) &&
+          !getTabIsApplicationHome(tab)
+      )
+      .map(tab => [tab, applications.get(getTabApplicationId(tab))])
+      .toList()
 );

@@ -30,11 +30,11 @@ export type DockActions = addAppItem | removeAppItem | changeAppItemPosition;
 // Action creators
 export const addAppItem = (applicationId: string) => ({
   type: ADD_APP_ITEM,
-  applicationId
+  applicationId,
 });
 export const removeAppItem = (applicationId: string) => ({
   type: REMOVE_APP_ITEM,
-  applicationId
+  applicationId,
 });
 export const changeAppItemPosition = (
   applicationId: string,
@@ -42,7 +42,7 @@ export const changeAppItemPosition = (
 ) => ({
   type: CHANGE_APP_ITEM_POSITION,
   applicationId,
-  index
+  index,
 });
 
 // Reducer

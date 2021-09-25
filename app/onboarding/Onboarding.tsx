@@ -1,7 +1,7 @@
 import {
   GradientType,
   InjectedProps as withGradientProps,
-  withGradient
+  withGradient,
 } from '@getstation/theme';
 import { withApollo, WithApolloClient } from 'react-apollo';
 import { remote } from 'electron';
@@ -14,7 +14,7 @@ import { bindActionCreators, compose } from 'redux';
 import ui from 'redux-ui';
 import {
   MinimalApplication,
-  Props as WithMyApplicationsProps
+  Props as WithMyApplicationsProps,
 } from '../applications/graphql/withApplications';
 import { isDarwin } from '../utils/process';
 import { appStoreStepFinished, startOnboarding } from './duck';
@@ -24,7 +24,7 @@ import {
   withGetDefaultApplicationsForOnboarding,
   withInstallApplication,
   InstallApplicationMutationVariables,
-  withOnboardingDone
+  withOnboardingDone,
 } from './queries@local.gql.generated';
 
 import { OnboardingType } from '../ui/types';
@@ -86,7 +86,7 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
     this.state = {
       isWindowFocused: this.win.isFocused(),
       searchInputValue: '',
-      currentSearchedApplicationsResult: null
+      currentSearchedApplicationsResult: null,
     };
 
     this.updateEmails = this.updateEmails.bind(this);
@@ -130,7 +130,7 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
   async updateSearchedApplications(term: string) {
     const applications = search(term);
     this.setState({
-      currentSearchedApplicationsResult: applications
+      currentSearchedApplicationsResult: applications,
     });
   }
 
@@ -146,7 +146,7 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
   updateEmails(emails: string[]) {
     const { updateUI } = this.props;
     return updateUI({
-      emails
+      emails,
     });
   }
 
@@ -188,7 +188,7 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
       firstName,
       installApplication,
       onboardingDone,
-      ui: { step, emails, loginButtonDisabled, loginError, showWelcomeBack }
+      ui: { step, emails, loginButtonDisabled, loginError, showWelcomeBack },
     } = this.props;
     const { isWindowFocused, searchInputValue } = this.state;
 
@@ -231,7 +231,7 @@ const Onboarding = compose(
         mutate && (await mutate({ variables: { input } }));
       };
       return { installApplication };
-    }
+    },
   }),
   withOnboardingDone({
     props: ({ mutate }) => {
@@ -243,12 +243,12 @@ const Onboarding = compose(
           (await mutate({ variables: { nbInstalledApps, onboardeeId } }));
       };
       return { onboardingDone };
-    }
+    },
   }),
   withGetDefaultApplicationsForOnboarding({
     props: ({ data }) => ({
-      applications: !!data && data.applications
-    })
+      applications: !!data && data.applications,
+    }),
   }),
   withApollo,
   connect<{}, DispatchFromProps, {}>(
@@ -256,7 +256,7 @@ const Onboarding = compose(
     dispatch =>
       bindActionCreators(
         {
-          onAppStoreStepFinished: appStoreStepFinished
+          onAppStoreStepFinished: appStoreStepFinished,
         },
         dispatch
       )
@@ -270,8 +270,8 @@ const Onboarding = compose(
       loginButtonDisabled: false,
       loginError: undefined,
       showWelcomeBack: false,
-      onboardingSessionId: undefined
-    }
+      onboardingSessionId: undefined,
+    },
   }),
   withGradient(GradientType.normal)
 )(OnboardingImpl);

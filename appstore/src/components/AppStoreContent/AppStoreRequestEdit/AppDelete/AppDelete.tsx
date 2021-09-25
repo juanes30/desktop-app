@@ -6,7 +6,7 @@ import { IconSymbol, Icon } from '@getstation/theme';
 import { SET_APP_MODAL_STATUS } from '@src/graphql/schemes/appModalStatus';
 import { MutateSetAppModalStatusProps } from '@src/graphql/types/mutateSetAppModalStatus';
 import styles, {
-  DeleteClasses
+  DeleteClasses,
 } from '@src/components/AppStoreContent/AppStoreRequestEdit/AppDelete/styles';
 
 interface IOwnProps {
@@ -20,8 +20,8 @@ class AppDelete extends React.Component<Props> {
   openModal = () => {
     this.props.mutateSetAppModalStatus({
       variables: {
-        isAppModalOpen: true
-      }
+        isAppModalOpen: true,
+      },
     });
   };
 

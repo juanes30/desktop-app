@@ -1,15 +1,14 @@
 import * as Immutable from 'immutable';
-import log from 'electron-log';
 import createCachedSelector from 're-reselect';
 import { createSelector } from 'reselect';
 import { getApplicationId, getApplicationActiveTab } from '../applications/get';
 import {
   getApplications,
-  getBadgeForApplication
+  getBadgeForApplication,
 } from '../applications/selectors';
 import {
   ApplicationImmutable,
-  StationApplication
+  StationApplication,
 } from '../applications/types';
 import { getOrderedFavoritesForApplicationId } from '../ordered-favorites/selectors';
 import { getOrderedTabsForApplicationId } from '../ordered-tabs/selectors';
@@ -18,7 +17,7 @@ import { StationState } from '../types';
 import {
   getLastActivityAt,
   getTabIsApplicationHome,
-  getTabFavoriteId
+  getTabFavoriteId,
 } from '../tabs/get';
 
 export const getDock = (state: StationState) => state.get('dock');
@@ -27,7 +26,7 @@ export const getTabsAndFavoritesForApplication = createCachedSelector(
   [
     getOrderedTabsForApplicationId,
     getOrderedFavoritesForApplicationId,
-    getTabsForApplication
+    getTabsForApplication,
   ],
   (orderedTabs, orderedFavorites, tabs) => {
     const homeTab = tabs.find(tab => tab.get('isApplicationHome'));
