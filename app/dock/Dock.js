@@ -5,16 +5,18 @@ import { remote } from 'electron';
 import log from 'electron-log';
 import mod from 'mod-op';
 import PropTypes from 'prop-types';
-import { findIndex, prop, propEq, tail } from 'ramda';
+import { findIndex, init, prop, propEq, tail } from 'ramda';
 import React from 'react';
 import { findDOMNode } from 'react-dom';
 import ImmutablePropTypes from 'react-immutable-proptypes';
-import { compose } from 'react-apollo';
+import { compose, graphql } from 'react-apollo';
 import injectSheet from 'react-jss';
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import scrollIntoViewIfNeeded from 'scroll-into-view-if-needed';
+import { Map } from 'immutable';
 
+import { submitAppRequest } from '../../appstore/src/app-request/duck';
 import { withGetActivity } from '../activity/queries@local.gql.generated';
 import { getKeyAboveTab } from '../app/selectors';
 import { openProcessManager } from '../app/duck';
@@ -59,6 +61,9 @@ import { getIsApplicationInstanceLogoInDock } from '../application-settings/sele
 import { logger } from '../api/logger';
 import { changeSelectedApp } from '../applications/duck';
 import { OnApplicationInstalled } from './OnApplicationInstalled';
+import { MapStateProxy } from '../persistence/backend';
+import { ApplicationProxy, TabProxy } from '../persistence/local.backend';
+import { UPDATE_APPLICATION_FROM_RECIPE } from '../../appstore/src/graphql/schemes/updateApplicationFromRecipe';
 
 const styles = () => ({
   bottomSection: {
@@ -101,7 +106,8 @@ class DockImpl extends React.PureComponent {
     setHighlightedRecentSubdockItemId: PropTypes.func.isRequired,
     showRecentSubdock: PropTypes.func.isRequired,
     hideRecentSubdock: PropTypes.func.isRequired,
-    createdDefaultApps: PropTypes.bool.isRequired
+    createdDefaultApps: PropTypes.bool.isRequired,
+    mutateUpdateApplicationFromRecipe: PropTypes.func.isRequired
   };
 
   static defaultProps = {
@@ -186,7 +192,7 @@ class DockImpl extends React.PureComponent {
 
   componentDidMount() {
     if (this.props.createdDefaultApps) {
-      log.debug(`createdDefaultApps: ${this.props.createdDefaultApps}`);
+      // this.newTest();
     }
   }
 
@@ -203,6 +209,122 @@ class DockImpl extends React.PureComponent {
       }
     });
   });
+
+  newTest = () => {
+    const applicationRecipe = {
+      name: 'Cloudworkz',
+      themeColor: '#000',
+      bxIconURL: '',
+      startURL: 'https://google.com/',
+      scope: new URL('https://google.com/').origin
+    };
+    log.debug(`props ${JSON.stringify(this.props)}`);
+    this.props
+      .mutateUpdateApplicationFromRecipe({
+        variables: {
+          applicationId: 'id',
+          applicationRecipe
+        }
+      })
+      .then(() => log.debug('newTest'))
+      .catch(error => log.debug(`newTest - ERROR ${error}`));
+  };
+
+  createDefaultApps = () => {
+    const proxy = new MapStateProxy(ApplicationProxy);
+    proxy
+      .get()
+      .then(apps => {
+        let mergeData = this.getDefaultApps();
+        for (const item of apps) {
+          const initObj = {};
+          initObj[item[0]] = Map(item[1]);
+          mergeData = mergeData.merge(Map(initObj));
+        }
+
+        proxy
+          .set(mergeData)
+          .then(() => proxy.get())
+          .then(() => log.debug('Create default apps'))
+          .catch(() => log.debug('ERROR WRITE - createdDefaultApps'));
+        return true;
+      })
+      .catch(error => log.debug(`ERROR READ - createdDefaultApps: ${error}`));
+  };
+
+  createDefaultTabs = () => {
+    const proxy = new MapStateProxy(TabProxy);
+    proxy
+      .get()
+      .then(tabs => {
+        let mergeData = this.getDefaultTabs();
+        for (const item of tabs) {
+          const initObj = {};
+          initObj[item[0]] = Map(item[1]);
+          mergeData = mergeData.merge(Map(initObj));
+        }
+
+        proxy
+          .set(mergeData)
+          .then(() => proxy.get())
+          .then(() => log.debug('Create default tabs '))
+          .catch(() => log.debug('ERROR WRITE - create tabs'));
+        return true;
+      })
+      .catch(error => log.debug(`ERROR READ - create default tabs: ${error}`));
+  };
+
+  getDefaultApps = () => {
+    const cloudworkz = Map({
+      'cloudworkz-app-Byg_4OpCzW': Map({
+        applicationId: 'cloudworkz-app-Byg_4OpCzW',
+        activeTab: 'cloudworkz-tab-Byg_4OpCzW',
+        manifestURL: 'station-manifest://1000001',
+        installContext: Map({
+          id: '1000001',
+          platform: 'appstore'
+        })
+      })
+    });
+
+    const freshDesk = Map({
+      'freshDesk-app-Byg_4OpCzW': Map({
+        applicationId: 'freshDesk-app-Byg_4OpCzW',
+        activeTab: 'freshDesk-tab-Byg_4OpCzW',
+        manifestURL: 'station-manifest://1000002',
+        installContext: Map({
+          id: '1000002',
+          platform: 'appstore'
+        })
+      })
+    });
+    const merge = cloudworkz.merge(freshDesk);
+    return merge;
+  };
+
+  getDefaultTabs = () => {
+    const tabCloudworkz = Map({
+      'cloudworkz-tab-Byg_4OpCzW': Map({
+        isApplicationHome: true,
+        applicationId: 'cloudworkz-app-Byg_4OpCzW',
+        url: 'https://cloudworkz.com/',
+        tabId: 'cloudworkz-tab-Byg_4OpCzW',
+        title: 'Cloudworkz'
+      })
+    });
+
+    const tabFreshDesk = Map({
+      'freshDesk-tab-Byg_4OpCzW': Map({
+        isApplicationHome: true,
+        applicationId: 'freshDesk-app-Byg_4OpCzW',
+        url: 'https://freshdesk.com/',
+        tabId: 'freshDesk-tab-Byg_4OpCzW',
+        title: 'Fresh Desk'
+      })
+    });
+    const merge = tabCloudworkz.merge(tabFreshDesk);
+    return merge;
+  };
 
   scrollToHighlightedItemComponent = el => {
     if (this.shouldScrollToHighlightedItemComponent) {
@@ -639,6 +761,9 @@ const Dock = compose(
       recentItems: data && data.activity ? tail(data.activity) : []
     })
   }),
+  graphql(UPDATE_APPLICATION_FROM_RECIPE, {
+    name: 'mutateUpdateApplicationFromRecipe'
+  }),
   connect(
     state => ({
       applications: getApplicationsForDock(state),
@@ -685,7 +810,8 @@ const Dock = compose(
           openProcessManager: () => openProcessManager(),
           closeSettings: () => updateUI('settings', 'isVisible', false),
           setHighlightedRecentSubdockItemId: id =>
-            updateUI('recentSubdock', 'highlightedItemId', id)
+            updateUI('recentSubdock', 'highlightedItemId', id),
+          submitCreateDefaultApps: submitAppRequest
         },
         dispatch
       )

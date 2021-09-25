@@ -67,8 +67,6 @@ export type ApplicationCreatedAction = Action<
   { applicationCreated: ApplicationCreated }
 >;
 
-export type DefaultAppsAction = Action<CREATE_DEFAULT_APPS, DefaultAppsData>;
-
 export type AppRequestActions =
   | SubmitAppRequestAction
   | ApiResponseAction
