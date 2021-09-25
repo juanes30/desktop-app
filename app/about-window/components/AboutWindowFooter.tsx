@@ -20,14 +20,14 @@ const styles = (theme: Theme) => ({
     bottom: 0,
     left: 0,
     color: theme.colors.gray.middle,
-    fontSize: 11
+    fontSize: 11,
   },
   link: {
     marginLeft: 10,
     fontWeight: 600,
     textDecoration: 'underline',
-    cursor: 'pointer'
-  }
+    cursor: 'pointer',
+  },
 });
 
 @injectSheet(styles)

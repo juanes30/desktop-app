@@ -29,7 +29,9 @@ storiesOf('Screens|Onboarding', module)
       onExpandWindow={action('onExpandWindow')}
       isDarwin={boolean('is Darwin', true)}
       validateEmail={validateEmail}
-      privacyPoliciesLink={'https://intercom.help/station/data-and-privacy/station-privacy-policies'}
+      privacyPoliciesLink={
+        'https://intercom.help/station/data-and-privacy/station-privacy-policies'
+      }
       searchInputValue={text('searchInputValue', '')}
       handleSearchInputValue={action('handleSearchInputValue')}
     />

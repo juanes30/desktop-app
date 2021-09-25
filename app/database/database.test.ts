@@ -9,7 +9,7 @@ tmp.setGracefulCleanup();
 
 export const createEngine = () => {
   const tmpDir = tmp.dirSync({
-    unsafeCleanup: true
+    unsafeCleanup: true,
   });
   const ns = cls.createNamespace('station');
   Sequelize.useCLS(ns);
@@ -20,12 +20,12 @@ export const createEngine = () => {
     pool: {
       max: 5,
       min: 0,
-      idle: 3600
+      idle: 3600,
     },
     operatorsAliases,
     logging: () => {},
     transactionType: Sequelize.Transaction.TYPES.IMMEDIATE,
-    storage: path.join(tmpDir.name, 'station_test.db')
+    storage: path.join(tmpDir.name, 'station_test.db'),
   });
 
   e.query('PRAGMA journal_mode = WAL;');

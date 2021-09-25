@@ -4,7 +4,7 @@ import {
   setApplicationCreated,
   SUBMIT_APP_REQUEST,
   SubmitAppRequestAction,
-  Visibility
+  Visibility,
 } from '@src/app-request/duck';
 import { SagaIterator } from 'redux-saga';
 import { all, call, put, takeLatest, select } from 'redux-saga/effects';
@@ -20,7 +20,7 @@ function* handleAppRequest(request: SubmitAppRequestAction): SagaIterator {
       themeColor: appRequestData.themeColor,
       bxIconURL: appRequestData.logoURL,
       startURL: appRequestData.signinURL,
-      scope: appRequestData.scope
+      scope: appRequestData.scope,
     };
 
     try {
@@ -33,7 +33,7 @@ function* handleAppRequest(request: SubmitAppRequestAction): SagaIterator {
       yield put(
         setApplicationCreated({
           id: body.id,
-          bxAppManifestURL: body.bxAppManifestURL
+          bxAppManifestURL: body.bxAppManifestURL,
         })
       );
     } catch (e) {

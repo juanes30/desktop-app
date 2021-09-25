@@ -8,12 +8,12 @@ export enum Steps {
   AppData = 'logo-url-form',
   Confirmation = 'confirmation-message',
   Exit = 'exit',
-  LegacyBxApiApp = 'legacy-bx-api-app-modal'
+  LegacyBxApiApp = 'legacy-bx-api-app-modal',
 }
 
 export enum Visibility {
   Private = 'USER_EMAIL',
-  Public = 'PUBLIC'
+  Public = 'PUBLIC',
 }
 
 export type AppRequestData = {
@@ -28,7 +28,7 @@ export type AppRequestData = {
 export enum ApiResponse {
   Error,
   Pending,
-  Done
+  Done,
 }
 
 export type ApplicationCreated = {
@@ -44,7 +44,7 @@ export type AppRequest = {
 
 const defaultState: AppRequest = {
   apiResponse: undefined,
-  applicationCreated: undefined
+  applicationCreated: undefined,
 };
 
 // Constants
@@ -77,19 +77,19 @@ export const submitAppRequest = (
   request: AppRequestData
 ): SubmitAppRequestAction => ({
   type: SUBMIT_APP_REQUEST,
-  ...request
+  ...request,
 });
 
 export const setApiResponse = (response: ApiResponse): ApiResponseAction => ({
   type: API_RESPONSE,
-  response
+  response,
 });
 
 export const setApplicationCreated = (
   applicationCreated: ApplicationCreated
 ): ApplicationCreatedAction => ({
   type: APPLICATION_CREATED,
-  applicationCreated
+  applicationCreated,
 });
 
 // Reducer

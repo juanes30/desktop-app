@@ -9,7 +9,7 @@ import {
   ListStateProxy,
   MapStateProxy,
   SingletonStateProxy,
-  StateProxy
+  StateProxy,
 } from './backend';
 import { ListProxyMixin, MapProxyMixin, SingletonProxyMixin } from './mixins';
 
@@ -28,7 +28,7 @@ const {
   User,
   UserWeeklyUsage,
   TabsSubdockOrder,
-  FavoritesSubdockOrder
+  FavoritesSubdockOrder,
 } = models;
 
 export const getVersion = () =>
@@ -53,14 +53,14 @@ export class ProfileDataProxy extends MapProxyMixin({
   mapStateToObject: async state => ({
     displayName: state.get('displayName'),
     email: state.get('email'),
-    imageURL: state.get('imageURL')
+    imageURL: state.get('imageURL'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       displayName: obj.displayName,
       email: obj.email,
-      imageURL: obj.imageURL
-    })
+      imageURL: obj.imageURL,
+    }),
 }) {}
 
 export class IdentityProxy extends MapProxyMixin({
@@ -73,7 +73,7 @@ export class IdentityProxy extends MapProxyMixin({
       identityId: state.get('identityId'),
       provider: state.get('provider'),
       refreshToken: state.get('refreshToken'),
-      userId: state.get('userId')
+      userId: state.get('userId'),
     };
     // Create profileData if it does not exists
     if (state.has('profileData')) {
@@ -93,8 +93,8 @@ export class IdentityProxy extends MapProxyMixin({
       userId: obj.userId,
       profileData: await ProfileDataProxy.mapObjectToStateOrNull(
         await obj.getProfileData()
-      )
-    })
+      ),
+    }),
 }) {}
 
 export class ApplicationProxy extends MapProxyMixin({
@@ -115,7 +115,7 @@ export class ApplicationProxy extends MapProxyMixin({
       notificationsEnabled: state.get('notificationsEnabled'),
       identityId: state.get('identityId'),
       subdomain: state.get('subdomain'),
-      customURL: state.get('customURL')
+      customURL: state.get('customURL'),
     };
   },
   mapObjectToState: async obj =>
@@ -132,8 +132,8 @@ export class ApplicationProxy extends MapProxyMixin({
       notificationsEnabled: obj.notificationsEnabled,
       identityId: obj.identityId,
       subdomain: obj.subdomain,
-      customURL: obj.customURL
-    })
+      customURL: obj.customURL,
+    }),
 }) {}
 
 const serializeFavicons = (state: Immutable.Map<string, any>) => {
@@ -157,7 +157,7 @@ export class TabProxy extends MapProxyMixin({
     title: state.get('title'),
     url: state.get('url'),
     favicons: serializeFavicons(state),
-    lastActivityAt: state.get('lastActivityAt')
+    lastActivityAt: state.get('lastActivityAt'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
@@ -167,8 +167,8 @@ export class TabProxy extends MapProxyMixin({
       title: obj.title,
       url: obj.url,
       favicons: unserializeFavicons(obj),
-      lastActivityAt: obj.lastActivityAt
-    })
+      lastActivityAt: obj.lastActivityAt,
+    }),
 }) {}
 
 export class FavoriteProxy extends MapProxyMixin({
@@ -179,7 +179,7 @@ export class FavoriteProxy extends MapProxyMixin({
     favoriteId: state.get('favoriteId'),
     title: state.get('title'),
     url: state.get('url'),
-    favicons: serializeFavicons(state)
+    favicons: serializeFavicons(state),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
@@ -187,8 +187,8 @@ export class FavoriteProxy extends MapProxyMixin({
       favoriteId: obj.favoriteId,
       title: obj.title,
       url: obj.url,
-      favicons: unserializeFavicons(obj)
-    })
+      favicons: unserializeFavicons(obj),
+    }),
 }) {}
 
 export class AppProxy extends SingletonProxyMixin({
@@ -197,28 +197,28 @@ export class AppProxy extends SingletonProxyMixin({
     version: state.get('version'),
     autoLaunchEnabled: state.get('autoLaunchEnabled'),
     downloadFolder: state.get('downloadFolder'),
-    promptDownload: state.get('promptDownload')
+    promptDownload: state.get('promptDownload'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       version: obj.version,
       autoLaunchEnabled: obj.autoLaunchEnabled,
       downloadFolder: obj.downloadFolder,
-      promptDownload: Boolean(obj.promptDownload)
-    })
+      promptDownload: Boolean(obj.promptDownload),
+    }),
 }) {}
 
 export class NavProxy extends SingletonProxyMixin({
   model: Nav,
   mapStateToObject: async state => ({
     previousTabApplicationId: state.get('previousTabApplicationId'),
-    tabApplicationId: state.get('tabApplicationId')
+    tabApplicationId: state.get('tabApplicationId'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       previousTabApplicationId: obj.previousTabApplicationId,
-      tabApplicationId: obj.tabApplicationId
-    })
+      tabApplicationId: obj.tabApplicationId,
+    }),
 }) {}
 
 export class UserProxy extends SingletonProxyMixin({
@@ -229,7 +229,7 @@ export class UserProxy extends SingletonProxyMixin({
     name: state.get('name'),
     firstName: state.get('firstName'),
     lastName: state.get('lastName'),
-    picture: state.get('picture')
+    picture: state.get('picture'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
@@ -238,8 +238,8 @@ export class UserProxy extends SingletonProxyMixin({
       name: obj.name,
       firstName: obj.firstName,
       lastName: obj.lastName,
-      picture: obj.picture
-    })
+      picture: obj.picture,
+    }),
 }) {}
 
 export class UserWeeklyUsageProxy extends ListProxyMixin({
@@ -250,7 +250,7 @@ export class UserWeeklyUsageProxy extends ListProxyMixin({
     for (const elt of state) {
       l.push({
         timestamp: elt,
-        order: i
+        order: i,
       });
       i += 1;
     }
@@ -258,7 +258,7 @@ export class UserWeeklyUsageProxy extends ListProxyMixin({
   },
   mapArrayToState: async obj =>
     Immutable.List(obj).map((elt: any) => elt.timestamp) as Immutable.List<any>,
-  orderBy: 'order'
+  orderBy: 'order',
 }) {}
 
 export class OnboardingProxy extends SingletonProxyMixin({
@@ -267,15 +267,15 @@ export class OnboardingProxy extends SingletonProxyMixin({
     done: state.get('done'),
     appStoreTooltipDisabled: state.get('appStoreTooltipDisabled'),
     sleepNotification: state.get('sleepNotification'),
-    lastInvitationColleagueDate: state.get('lastInvitationColleagueDate')
+    lastInvitationColleagueDate: state.get('lastInvitationColleagueDate'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       done: obj.done,
       appStoreTooltipDisabled: obj.appStoreTooltipDisabled,
       sleepNotification: obj.sleepNotification,
-      lastInvitationColleagueDate: obj.lastInvitationColleagueDate
-    })
+      lastInvitationColleagueDate: obj.lastInvitationColleagueDate,
+    }),
 }) {}
 
 export class DockProxy extends ListProxyMixin({
@@ -286,7 +286,7 @@ export class DockProxy extends ListProxyMixin({
     for (const elt of state) {
       l.push({
         applicationId: elt,
-        order: i
+        order: i,
       });
       i += 1;
     }
@@ -296,7 +296,7 @@ export class DockProxy extends ListProxyMixin({
     Immutable.List(obj).map((elt: any) => elt.applicationId) as Immutable.List<
       any
     >,
-  orderBy: 'order'
+  orderBy: 'order',
 }) {}
 
 export class SubwindowProxy extends ListProxyMixin({
@@ -305,13 +305,13 @@ export class SubwindowProxy extends ListProxyMixin({
     const l = [];
     for (const elt of state) {
       l.push({
-        tabId: elt
+        tabId: elt,
       });
     }
     return l;
   },
   mapArrayToState: async obj =>
-    Immutable.Set(obj).map((elt: any) => elt.tabId) as Immutable.List<any>
+    Immutable.Set(obj).map((elt: any) => elt.tabId) as Immutable.List<any>,
 }) {}
 
 const favoriteProxy = new MapStateProxy(FavoriteProxy);
@@ -323,15 +323,15 @@ export class ApplicationSettingsProxy extends MapProxyMixin({
     manifestURL: state.get('manifestURL'),
     doNotInstall: state.get('doNotInstall'),
     alwaysLoaded: state.get('alwaysLoaded'),
-    instanceLogoInDock: state.get('instanceLogoInDock')
+    instanceLogoInDock: state.get('instanceLogoInDock'),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       manifestURL: obj.manifestURL,
       doNotInstall: obj.doNotInstall,
       alwaysLoaded: obj.alwaysLoaded,
-      instanceLogoInDock: obj.instanceLogoInDock
-    })
+      instanceLogoInDock: obj.instanceLogoInDock,
+    }),
 }) {}
 
 export class TabsSubdockOrderProxy extends MapProxyMixin({
@@ -339,13 +339,13 @@ export class TabsSubdockOrderProxy extends MapProxyMixin({
   key: 'applicationId',
   mapStateToObject: async state => ({
     applicationId: state.get('applicationId'),
-    stringifiedOrder: JSON.stringify(state.get('order', []).toArray())
+    stringifiedOrder: JSON.stringify(state.get('order', []).toArray()),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       applicationId: obj.applicationId,
-      order: Immutable.List(JSON.parse(obj.stringifiedOrder))
-    })
+      order: Immutable.List(JSON.parse(obj.stringifiedOrder)),
+    }),
 }) {}
 
 export class FavoritesSubdockOrderProxy extends MapProxyMixin({
@@ -353,13 +353,13 @@ export class FavoritesSubdockOrderProxy extends MapProxyMixin({
   key: 'applicationId',
   mapStateToObject: async state => ({
     applicationId: state.get('applicationId'),
-    stringifiedOrder: JSON.stringify(state.get('order', []).toArray())
+    stringifiedOrder: JSON.stringify(state.get('order', []).toArray()),
   }),
   mapObjectToState: async obj =>
     Immutable.Map({
       applicationId: obj.applicationId,
-      order: Immutable.List(JSON.parse(obj.stringifiedOrder))
-    })
+      order: Immutable.List(JSON.parse(obj.stringifiedOrder)),
+    }),
 }) {}
 
 export default function getBackend() {
@@ -374,10 +374,10 @@ export default function getBackend() {
     favorites: <StateProxy<Immutable.Map<string, any>>>{
       get: async () =>
         Immutable.Map({
-          favorites: await favoriteProxy.get()
+          favorites: await favoriteProxy.get(),
         }),
       set: async (state: Immutable.Map<string, any>) =>
-        favoriteProxy.set(state.get('favorites'))
+        favoriteProxy.set(state.get('favorites')),
     },
     onboarding: new SingletonStateProxy(OnboardingProxy),
     tabs: new MapStateProxy(TabProxy),
@@ -388,6 +388,6 @@ export default function getBackend() {
     passwordManagerLinks: getPasswordManagerLinks(models),
     applicationSettings: new MapStateProxy(ApplicationSettingsProxy),
     orderedTabs: new MapStateProxy(TabsSubdockOrderProxy),
-    orderedFavorites: new MapStateProxy(FavoritesSubdockOrderProxy)
+    orderedFavorites: new MapStateProxy(FavoritesSubdockOrderProxy),
   };
 }

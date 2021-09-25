@@ -12,19 +12,19 @@ import {
   setApiResponse,
   Steps,
   submitAppRequest,
-  Visibility
+  Visibility,
 } from '@src/app-request/duck';
 import {
   getApiResponse,
-  getApplicationCreated
+  getApplicationCreated,
 } from '@src/app-request/selectors';
 import { ApplicationsAvailable } from '@src/graphql/queries';
 import { State } from '@src/state';
 import withCustomAppRequestMode, {
-  WithCustomAppRequestModeStatus
+  WithCustomAppRequestModeStatus,
 } from '@src/HOC/withCustomAppRequestMode';
 import withSearchString, {
-  WithSearchStringProps
+  WithSearchStringProps,
 } from '@src/HOC/withSearchString';
 import AppStorePageCategoryTitle from '@src/components/AppStoreContent/AppStorePageCategoryTitle/AppStorePageCategoryTitle';
 import { CSSTransition, TransitionGroup } from 'react-transition-group';
@@ -37,7 +37,7 @@ import styles, { AppRequestClasses } from './styles';
 
 enum CustomAppFormOpenedVia {
   FloatingButton = 'floating-action-button',
-  EmptySearchButton = 'empty-search-action-button'
+  EmptySearchButton = 'empty-search-action-button',
 }
 
 interface IState {
@@ -99,8 +99,8 @@ class AppRequestImpl extends React.Component<Props, IState> {
       logoURL: '',
       signinURL: '',
       scope: '',
-      visibility: Visibility.Private
-    }
+      visibility: Visibility.Private,
+    },
   };
 
   constructor(props: Props) {
@@ -129,7 +129,7 @@ class AppRequestImpl extends React.Component<Props, IState> {
     if (nexProps.appRequestIsOpen && !isVisible) {
       this.setState({
         isVisible: true,
-        appRequestVisibleOrigin: CustomAppFormOpenedVia.EmptySearchButton
+        appRequestVisibleOrigin: CustomAppFormOpenedVia.EmptySearchButton,
       });
     }
   }
@@ -141,30 +141,30 @@ class AppRequestImpl extends React.Component<Props, IState> {
       step: Steps.AppName,
       request: {
         ...AppRequestImpl.defaultState.request,
-        name: searchStringAfterEnterPress || ''
+        name: searchStringAfterEnterPress || '',
       },
-      formSessionId: uuid.v4()
+      formSessionId: uuid.v4(),
     });
   }
 
   async onSetAppName(name: string) {
     this.setState({
       animAppearDirection: false,
-      animExitDirection: false
+      animExitDirection: false,
     });
     const similarApplications = await findApplicationByName(name.trim());
     if (similarApplications.length > 0) {
       return this.setState((prevState, _) => ({
         request: { ...prevState.request, name },
         step: Steps.Disambiguation,
-        similarApplications
+        similarApplications,
       }));
     }
 
     this.setState((prevState, _) => ({
       request: { ...prevState.request, name },
       step: Steps.AppData,
-      similarApplications: undefined
+      similarApplications: undefined,
     }));
   }
 
@@ -187,9 +187,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
       ...this.state,
       request: {
         ...this.state.request,
-        themeColor
+        themeColor,
       },
-      errorInputColor: error
+      errorInputColor: error,
     });
   };
 
@@ -201,9 +201,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
       ...this.state,
       request: {
         ...this.state.request,
-        logoURL
+        logoURL,
       },
-      errorLogoURL: error
+      errorLogoURL: error,
     });
   };
 
@@ -215,9 +215,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
       ...this.state,
       request: {
         ...this.state.request,
-        signinURL
+        signinURL,
       },
-      errorSigninURL: error
+      errorSigninURL: error,
     });
   };
 
@@ -238,7 +238,7 @@ class AppRequestImpl extends React.Component<Props, IState> {
         ...this.state,
         errorInputColor,
         errorLogoURL,
-        errorSigninURL
+        errorSigninURL,
       });
     }
 
@@ -251,9 +251,9 @@ class AppRequestImpl extends React.Component<Props, IState> {
           logoURL,
           signinURL,
           themeColor,
-          scope
+          scope,
         },
-        animExitDirection: true
+        animExitDirection: true,
       }),
       () => {
         this.setState({ step: Steps.Confirmation });
@@ -307,7 +307,7 @@ class AppRequestImpl extends React.Component<Props, IState> {
     const {
       request: { name, logoURL, visibility, themeColor },
       step,
-      similarApplications
+      similarApplications,
     } = this.state;
 
     switch (step) {
@@ -424,13 +424,13 @@ class AppRequestImpl extends React.Component<Props, IState> {
 const AppRequest = connect<IStateProps, IDispatchProps, IOwnProps>(
   (state: State) => ({
     apiResponse: getApiResponse(state),
-    applicationCreated: getApplicationCreated(state)
+    applicationCreated: getApplicationCreated(state),
   }),
   (dispatch: Dispatch) =>
     bindActionCreators(
       {
         submit: submitAppRequest,
-        setApiResponse
+        setApiResponse,
       },
       dispatch
     )
