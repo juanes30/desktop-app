@@ -10,42 +10,60 @@ const openFaq = () => {
 };
 
 const openPrivacyPolicies = () => {
-  shell.openExternal('https://intercom.help/station/data-and-privacy/station-privacy-policies');
+  shell.openExternal(
+    'https://intercom.help/station/data-and-privacy/station-privacy-policies'
+  );
 };
 
 export class BrowserXMenuManager extends EventEmitter {
-
   protected _menu: Electron.Menu;
 
   get menu() {
     if (!this._menu) {
       if (isDarwin) {
-        this._menu = Menu.buildFromTemplate(this.darwinMenuTemplate as Electron.MenuItemConstructorOptions[]);
+        this._menu = Menu.buildFromTemplate(this
+          .darwinMenuTemplate as Electron.MenuItemConstructorOptions[]);
       } else {
-        this._menu = Menu.buildFromTemplate(this.defaultMenuTemplate as Electron.MenuItemConstructorOptions[]);
+        this._menu = Menu.buildFromTemplate(this
+          .defaultMenuTemplate as Electron.MenuItemConstructorOptions[]);
       }
     }
     return this._menu;
   }
 
-  getMenuItemFromShortcut(shortcutKey: string, addClick: boolean = false, addRole: boolean = false) {
+  getMenuItemFromShortcut(
+    shortcutKey: string,
+    addClick: boolean = false,
+    addRole: boolean = false
+  ) {
     const emit = this.emit.bind(this);
-    const { label, id, role, accelerator, disabled, visibleInMenu } = SHORTCUTS[shortcutKey];
+    const { label, id, role, accelerator, disabled, visibleInMenu } = SHORTCUTS[
+      shortcutKey
+    ];
     return Object.assign(
       {
         id,
         label,
         accelerator,
         visible: !disabled && visibleInMenu,
-        enabled: !disabled,
+        enabled: !disabled
       },
       addRole ? { role } : {},
-      addClick ? {
-        click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-          emit('click-item', { event: serializedKeyboardEvent(event), action: id }
-          );
-        },
-      } : {});
+      addClick
+        ? {
+            click(
+              _menuItem: Electron.MenuItem,
+              _browserWindow: Electron.BrowserWindow,
+              event: Electron.KeyboardEvent
+            ) {
+              emit('click-item', {
+                event: serializedKeyboardEvent(event),
+                action: id
+              });
+            }
+          }
+        : {}
+    );
   }
 
   getMainMenuTemplate() {
@@ -55,45 +73,52 @@ export class BrowserXMenuManager extends EventEmitter {
       label: 'Station',
       submenu: [
         {
-          label: 'About Station',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'about' });
-          },
+          label: 'About Cloudworkz',
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'about'
+            });
+          }
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           ...this.getMenuItemFromShortcut('settings', true),
-          label: 'Preferences...',
+          label: 'Preferences...'
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           role: 'services',
-          submenu: [],
+          submenu: []
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           ...this.getMenuItemFromShortcut('hide-station'),
-          selector: 'hide:',
+          selector: 'hide:'
         },
         {
           ...this.getMenuItemFromShortcut('hide-others'),
-          selector: 'hideOtherApplications:',
+          selector: 'hideOtherApplications:'
         },
         {
           label: 'Show All',
-          selector: 'unhideAllApplications:',
+          selector: 'unhideAllApplications:'
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
-        this.getMenuItemFromShortcut('app-quit', true),
-      ],
+        this.getMenuItemFromShortcut('app-quit', true)
+      ]
     };
   }
 
@@ -104,11 +129,11 @@ export class BrowserXMenuManager extends EventEmitter {
         this.getMenuItemFromShortcut('undo', false, true),
         this.getMenuItemFromShortcut('redo', false, true),
         {
-          type: 'separator',
+          type: 'separator'
         },
         this.getMenuItemFromShortcut('find', true),
         {
-          type: 'separator',
+          type: 'separator'
         },
         this.getMenuItemFromShortcut('cut', false, true),
         this.getMenuItemFromShortcut('copy', false, true),
@@ -116,8 +141,8 @@ export class BrowserXMenuManager extends EventEmitter {
         this.getMenuItemFromShortcut('paste-and-match-style', true),
         this.getMenuItemFromShortcut('paste-and-match-style-hidden', true),
         this.getMenuItemFromShortcut('select-all', false, true),
-        this.getMenuItemFromShortcut('copy-url-to-clipboard', true),
-      ],
+        this.getMenuItemFromShortcut('copy-url-to-clipboard', true)
+      ]
     };
   }
 
@@ -129,12 +154,12 @@ export class BrowserXMenuManager extends EventEmitter {
       submenu: [
         this.getMenuItemFromShortcut('bang', true),
         {
-          type: 'separator',
+          type: 'separator'
         },
         this.getMenuItemFromShortcut('page-reload', true),
         this.getMenuItemFromShortcut('app-reload', true),
         {
-          type: 'separator',
+          type: 'separator'
         },
         this.getMenuItemFromShortcut('page-reset-zoom', true),
         this.getMenuItemFromShortcut('page-zoom-in', true),
@@ -143,23 +168,30 @@ export class BrowserXMenuManager extends EventEmitter {
         this.getMenuItemFromShortcut('detach-current-tab', true),
         this.getMenuItemFromShortcut('close-current-tab', true),
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           label: 'Developer',
           submenu: [
             this.getMenuItemFromShortcut('page-devtools', true),
             this.getMenuItemFromShortcut('app-devtools', true),
-            this.getMenuItemFromShortcut('worker-devtools', true),
-          ],
+            this.getMenuItemFromShortcut('worker-devtools', true)
+          ]
         },
         {
           label: 'Open Process Manager',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'open-process-manager' });
-          },
-        },
-      ],
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'open-process-manager'
+            });
+          }
+        }
+      ]
     };
   }
 
@@ -168,8 +200,8 @@ export class BrowserXMenuManager extends EventEmitter {
       label: 'History',
       submenu: [
         this.getMenuItemFromShortcut('page-go-back', true),
-        this.getMenuItemFromShortcut('page-go-forward', true),
-      ],
+        this.getMenuItemFromShortcut('page-go-forward', true)
+      ]
     };
   }
 
@@ -182,23 +214,30 @@ export class BrowserXMenuManager extends EventEmitter {
         this.getMenuItemFromShortcut('minimize', false, true),
         {
           label: 'Close',
-          selector: 'close',
+          selector: 'close'
         },
         {
           label: 'Reset Position',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'reset-window-position' });
-          },
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'reset-window-position'
+            });
+          }
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           label: 'Bring All to Front',
-          selector: 'front',
+          selector: 'front'
         },
-        this.getMenuItemFromShortcut('detach-current-tab', true),
-      ],
+        this.getMenuItemFromShortcut('detach-current-tab', true)
+      ]
     };
   }
 
@@ -209,50 +248,85 @@ export class BrowserXMenuManager extends EventEmitter {
       label: 'Help',
       submenu: [
         {
-          label: 'About Station',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'about' });
-          },
+          label: 'About Cloudworkz App',
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'about'
+            });
+          }
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         this.getMenuItemFromShortcut('toggle-kbd-shortcuts', true),
         {
           label: 'FAQ',
           click() {
             openFaq();
-          },
+          }
         },
         {
-          label: 'What\'s new in Station',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'show-release-notes' });
-          },
+          label: "What's new in Station",
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'show-release-notes'
+            });
+          }
         },
         {
           label: 'Bugs && Features request',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'show-community' });
-          },
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'show-community'
+            });
+          }
         },
         {
-          label: 'Discover Station\'s features',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'station-tour' });
-          },
+          label: "Discover Station's features",
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'station-tour'
+            });
+          }
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           id: 'reset-current-application',
           label: 'Reset Current Application',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'reset-current-application' });
-          },
-        },
-      ],
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'reset-current-application'
+            });
+          }
+        }
+      ]
     };
   }
 
@@ -267,43 +341,71 @@ export class BrowserXMenuManager extends EventEmitter {
           label: 'FAQ',
           click() {
             openFaq();
-          },
+          }
         },
         {
           label: 'Bugs && Features request',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'show-community' });
-          },
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'show-community'
+            });
+          }
         },
         {
           label: 'Privacy policies',
           click() {
             openPrivacyPolicies();
-          },
+          }
         },
         {
-          label: 'What\'s new in Station',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'show-release-notes' });
-          },
+          label: "What's new in Station",
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'show-release-notes'
+            });
+          }
         },
         {
-          label: 'Discover Station\'s features',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'station-tour' });
-          },
+          label: "Discover Station's features",
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'station-tour'
+            });
+          }
         },
         {
-          type: 'separator',
+          type: 'separator'
         },
         {
           id: 'reset-current-application',
           label: 'Reset Current Application',
-          click(_menuItem: Electron.MenuItem, _browserWindow: Electron.BrowserWindow, event: Electron.KeyboardEvent) {
-            emit('click-item', { event: serializedKeyboardEvent(event), action: 'reset-current-application' });
-          },
-        },
-      ],
+          click(
+            _menuItem: Electron.MenuItem,
+            _browserWindow: Electron.BrowserWindow,
+            event: Electron.KeyboardEvent
+          ) {
+            emit('click-item', {
+              event: serializedKeyboardEvent(event),
+              action: 'reset-current-application'
+            });
+          }
+        }
+      ]
     };
   }
 
@@ -314,7 +416,7 @@ export class BrowserXMenuManager extends EventEmitter {
       this.getViewMenuTemplate(),
       this.getHistoryTemplate(),
       this.getWindowMenuTemplate(),
-      this.getHelpMenuTemplateDarwin(),
+      this.getHelpMenuTemplateDarwin()
     ];
   }
 
@@ -324,10 +426,10 @@ export class BrowserXMenuManager extends EventEmitter {
       submenu: [
         {
           ...this.getMenuItemFromShortcut('settings', true),
-          label: 'Options...',
+          label: 'Options...'
         },
-        this.getMenuItemFromShortcut('app-quit', true),
-      ],
+        this.getMenuItemFromShortcut('app-quit', true)
+      ]
     };
   }
 
@@ -337,7 +439,7 @@ export class BrowserXMenuManager extends EventEmitter {
       this.getEditMenuTemplate(),
       this.getViewMenuTemplate(),
       this.getHistoryTemplate(),
-      this.getHelpMenuTemplateWindows(),
+      this.getHelpMenuTemplateWindows()
     ];
   }
 }

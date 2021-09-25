@@ -11,14 +11,16 @@ import ReduxBasedGradientProvider from '../theme/ReduxBasedGradientProvider';
 import { handleError } from '../services/api/helpers';
 import ConsoleErrorBoundary from '../common/containers/ConsoleErrorBoundary';
 
-configureStore().then(store => {
-  // for debug purpose, gives us a way to easily access the store
-  window.stationStore = store;
+configureStore()
+  .then(store => {
+    // for debug purpose, gives us a way to easily access the store
+    window.stationStore = store;
 
-  render(store);
-}).catch(handleError());
+    render(store);
+  })
+  .catch(handleError());
 
-const render = (store) => {
+const render = store => {
   const AboutWindowContainer = require('./Container').default; // eslint-disable-line global-require
   ReactDOM.render(
     <Provider store={store}>
@@ -27,11 +29,13 @@ const render = (store) => {
           <AboutWindowContainer />
         </ReduxBasedGradientProvider>
       </ConsoleErrorBoundary>
-    </Provider>
-    , document.getElementById('root')
+    </Provider>,
+    document.getElementById('root')
   );
 
   ipcRenderer.send('bx-ready-to-show');
 };
 
-if (module.hot) { module.hot.accept(); }
+if (module.hot) {
+  module.hot.accept();
+}

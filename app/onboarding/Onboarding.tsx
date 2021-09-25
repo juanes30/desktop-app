@@ -1,4 +1,8 @@
-import { GradientType, InjectedProps as withGradientProps, withGradient } from '@getstation/theme';
+import {
+  GradientType,
+  InjectedProps as withGradientProps,
+  withGradient
+} from '@getstation/theme';
 import { withApollo, WithApolloClient } from 'react-apollo';
 import { remote } from 'electron';
 import * as Immutable from 'immutable';
@@ -10,7 +14,7 @@ import { bindActionCreators, compose } from 'redux';
 import ui from 'redux-ui';
 import {
   MinimalApplication,
-  Props as WithMyApplicationsProps,
+  Props as WithMyApplicationsProps
 } from '../applications/graphql/withApplications';
 import { isDarwin } from '../utils/process';
 import { appStoreStepFinished, startOnboarding } from './duck';
@@ -20,56 +24,55 @@ import {
   withGetDefaultApplicationsForOnboarding,
   withInstallApplication,
   InstallApplicationMutationVariables,
-  withOnboardingDone,
+  withOnboardingDone
 } from './queries@local.gql.generated';
 
 import { OnboardingType } from '../ui/types';
 import { manifestToMinimalApplication, search } from '../../manifests';
 
 export interface DispatchFromProps {
-  onClickLogin: typeof startOnboarding,
-  onAppStoreStepFinished: typeof appStoreStepFinished,
+  onClickLogin: typeof startOnboarding;
+  onAppStoreStepFinished: typeof appStoreStepFinished;
 }
 
 export interface UIProp {
-  step: number,
-  emails: string[],
-  loginButtonDisabled: boolean,
-  loginError?: string,
-  showWelcomeBack: boolean,
-  onboardingSessionId: string,
-  onboardingType: OnboardingType,
+  step: number;
+  emails: string[];
+  loginButtonDisabled: boolean;
+  loginError?: string;
+  showWelcomeBack: boolean;
+  onboardingSessionId: string;
+  onboardingType: OnboardingType;
 }
 
 export interface UIProps {
-  ui: UIProp,
-  updateUI: (uiState: Object) => any
+  ui: UIProp;
+  updateUI: (uiState: Object) => any;
 }
 
 type InstallApplicationInput = InstallApplicationMutationVariables['input'];
 
 type InstallApplicationProps = {
-  installApplication: (input: InstallApplicationInput) => Promise<void>,
+  installApplication: (input: InstallApplicationInput) => Promise<void>;
 };
 
 type OnboardingDoneProps = {
-  onboardingDone: (nbInstalledApps: number) => Promise<void>,
+  onboardingDone: (nbInstalledApps: number) => Promise<void>;
 };
 
-export type Props =
-  StateToProps
-  & DispatchFromProps
-  & UIProps
-  & InstallApplicationProps
-  & OnboardingDoneProps
-  & WithMyApplicationsProps<MinimalApplication>
-  & withGradientProps
-  & WithApolloClient<{}>;
+export type Props = StateToProps &
+  DispatchFromProps &
+  UIProps &
+  InstallApplicationProps &
+  OnboardingDoneProps &
+  WithMyApplicationsProps<MinimalApplication> &
+  withGradientProps &
+  WithApolloClient<{}>;
 
 interface State {
-  isWindowFocused: boolean,
-  searchInputValue: string,
-  currentSearchedApplicationsResult: MinimalApplication[] | null,
+  isWindowFocused: boolean;
+  searchInputValue: string;
+  currentSearchedApplicationsResult: MinimalApplication[] | null;
 }
 
 class OnboardingImpl extends React.PureComponent<Props, State> {
@@ -83,7 +86,7 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
     this.state = {
       isWindowFocused: this.win.isFocused(),
       searchInputValue: '',
-      currentSearchedApplicationsResult: null,
+      currentSearchedApplicationsResult: null
     };
 
     this.updateEmails = this.updateEmails.bind(this);
@@ -127,7 +130,7 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
   async updateSearchedApplications(term: string) {
     const applications = search(term);
     this.setState({
-      currentSearchedApplicationsResult: applications,
+      currentSearchedApplicationsResult: applications
     });
   }
 
@@ -136,25 +139,26 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
     this.win.removeListener('blur', this.onBlur);
   }
 
-  onFocus() { }
+  onFocus() {}
 
-  onBlur() { }
+  onBlur() {}
 
   updateEmails(emails: string[]) {
     const { updateUI } = this.props;
     return updateUI({
-      emails,
+      emails
     });
   }
 
   getApplications(): MinimalApplication[] {
-    const {
-      applications,
-    } = this.props;
+    const { applications } = this.props;
 
     if (!applications) return [];
 
-    if (this.state.searchInputValue !== '' && this.state.currentSearchedApplicationsResult) {
+    if (
+      this.state.searchInputValue !== '' &&
+      this.state.currentSearchedApplicationsResult
+    ) {
       return this.state.currentSearchedApplicationsResult;
     }
 
@@ -179,9 +183,12 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
 
   render() {
     const {
-      onClickLogin, onAppStoreStepFinished, firstName,
-      installApplication, onboardingDone,
-      ui: { step, emails, loginButtonDisabled, loginError, showWelcomeBack },
+      onClickLogin,
+      onAppStoreStepFinished,
+      firstName,
+      installApplication,
+      onboardingDone,
+      ui: { step, emails, loginButtonDisabled, loginError, showWelcomeBack }
     } = this.props;
     const { isWindowFocused, searchInputValue } = this.state;
 
@@ -198,7 +205,9 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
         emails={emails}
         onEmailsChange={this.updateEmails}
         loginButtonDisabled={loginButtonDisabled}
-        privacyPoliciesLink={'https://intercom.help/station/data-and-privacy/station-privacy-policies'}
+        privacyPoliciesLink={
+          'https://intercom.help/station/data-and-privacy/station-privacy-policies'
+        }
         isWindowFocused={isWindowFocused}
         onCloseWindow={this.handleCloseWindow}
         onMinimizeWindow={this.handleMinimizeWindow}
@@ -216,34 +225,41 @@ class OnboardingImpl extends React.PureComponent<Props, State> {
 const Onboarding = compose(
   withInstallApplication({
     props: ({ mutate }): InstallApplicationProps => {
-      const installApplication = async (input: InstallApplicationInput): Promise<void> => {
-        mutate && await mutate({ variables: { input } });
+      const installApplication = async (
+        input: InstallApplicationInput
+      ): Promise<void> => {
+        mutate && (await mutate({ variables: { input } }));
       };
       return { installApplication };
-    },
+    }
   }),
   withOnboardingDone({
     props: ({ mutate }) => {
-      const onboardingDone = async (nbInstalledApps: number, onboardeeId?: string): Promise<void> => {
-        mutate && await mutate({ variables: { nbInstalledApps, onboardeeId } });
+      const onboardingDone = async (
+        nbInstalledApps: number,
+        onboardeeId?: string
+      ): Promise<void> => {
+        mutate &&
+          (await mutate({ variables: { nbInstalledApps, onboardeeId } }));
       };
       return { onboardingDone };
-    },
+    }
   }),
   withGetDefaultApplicationsForOnboarding({
-    props:({ data }) => ({
-      applications: !!data && data.applications,
-    }),
+    props: ({ data }) => ({
+      applications: !!data && data.applications
+    })
   }),
   withApollo,
   connect<{}, DispatchFromProps, {}>(
     (state: Immutable.Map<string, any>) => ({}),
-    dispatch => bindActionCreators(
-      {
-        onAppStoreStepFinished: appStoreStepFinished,
-      },
-      dispatch
-    )
+    dispatch =>
+      bindActionCreators(
+        {
+          onAppStoreStepFinished: appStoreStepFinished
+        },
+        dispatch
+      )
   ),
   ui({
     key: 'onboarding',
@@ -254,8 +270,8 @@ const Onboarding = compose(
       loginButtonDisabled: false,
       loginError: undefined,
       showWelcomeBack: false,
-      onboardingSessionId: undefined,
-    },
+      onboardingSessionId: undefined
+    }
   }),
   withGradient(GradientType.normal)
 )(OnboardingImpl);

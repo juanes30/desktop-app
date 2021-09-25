@@ -2,6 +2,7 @@ import { updateUI } from 'redux-ui/transpiled/action-reducer';
 import classNames from 'classnames';
 import memoize from 'memoizee';
 import { remote } from 'electron';
+import log from 'electron-log';
 import mod from 'mod-op';
 import PropTypes from 'prop-types';
 import { findIndex, prop, propEq, tail } from 'ramda';
@@ -21,12 +22,16 @@ import AppStore from '../app-store/AppStore';
 import * as appActions from '../applications/ApplicationsActions';
 import { executeWebviewMethodForCurrentTab } from '../tab-webcontents/duck';
 import { getSearchValue } from '../bang/selectors';
-import { cyclingStep as bangCyclingStep, selectItem as selectBangItem, setVisibility } from '../bang/duck';
+import {
+  cyclingStep as bangCyclingStep,
+  selectItem as selectBangItem,
+  setVisibility
+} from '../bang/duck';
 import {
   getApplicationBadge,
   getApplicationIconURL,
   getApplicationId,
-  getApplicationManifestURL,
+  getApplicationManifestURL
 } from '../applications/get';
 import { getForeFrontNavigationStateProperty } from '../applications/utils';
 import AutoUpdateDockNotification from '../auto-update/AutoUpdateDockNotification';
@@ -40,13 +45,13 @@ import {
   getUILeftDockApplicationTabAdded,
   getUIRecentSubdockHighlightedItemId,
   getUIRecentSubdockIsVisible,
-  getUISettingsIsVisible,
+  getUISettingsIsVisible
 } from '../ui/selectors';
 import DockItem from './components/DockItem';
 import KeyboardShortcuts from './components/KeyboardShortcuts';
 import DockIconDragLayer from './DockIconDragLayer';
 import * as dockActions from './duck';
-import { getApplicationsForDock } from './selectors';
+import { getApplicationsForDock, mustBeCreateDefaultApps } from './selectors';
 import { isDarwin } from '../utils/process';
 import DockWrapper from './components/DockWrapper';
 import DockTopSection from './components/DockTopSection';
@@ -96,13 +101,14 @@ class DockImpl extends React.PureComponent {
     setHighlightedRecentSubdockItemId: PropTypes.func.isRequired,
     showRecentSubdock: PropTypes.func.isRequired,
     hideRecentSubdock: PropTypes.func.isRequired,
+    createdDefaultApps: PropTypes.bool.isRequired
   };
 
   static defaultProps = {
     activeApplicationId: '',
     subdockApplicationId: null,
     applicationsTabAdded: undefined,
-    highlightedItemId: undefined,
+    highlightedItemId: undefined
   };
 
   constructor(props) {
@@ -136,28 +142,38 @@ class DockImpl extends React.PureComponent {
 
   UNSAFE_componentWillReceiveProps(nextProps) {
     const { activeCyclingTabId } = this.state;
-    const highlightedItemIdChanged = this.props.highlightedItemId !== nextProps.highlightedItemId;
-    const activeCyclingTabIdNotChanged = activeCyclingTabId && activeCyclingTabId !== nextProps.highlightedItemId;
+    const highlightedItemIdChanged =
+      this.props.highlightedItemId !== nextProps.highlightedItemId;
+    const activeCyclingTabIdNotChanged =
+      activeCyclingTabId && activeCyclingTabId !== nextProps.highlightedItemId;
     if (highlightedItemIdChanged && activeCyclingTabIdNotChanged) {
       this.setState({ activeCyclingTabId: nextProps.highlightedItemId });
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.state.applicationId && (this.isSubdockOpen(this.state) !== this.isSubdockOpen(prevState)
-      || prevState.applicationId !== this.state.applicationId)) {
+    if (
+      this.state.applicationId &&
+      (this.isSubdockOpen(this.state) !== this.isSubdockOpen(prevState) ||
+        prevState.applicationId !== this.state.applicationId)
+    ) {
       this.props.onOverStateChange(this.state.applicationId);
     }
 
-    if (this.props.activeApplicationId !== undefined &&
-      prevProps.activeApplicationId !== this.props.activeApplicationId) {
+    if (
+      this.props.activeApplicationId !== undefined &&
+      prevProps.activeApplicationId !== this.props.activeApplicationId
+    ) {
       this.shouldScrollToHighlightedItemComponent = true;
     }
 
     // clean the `iconRefs` when an application is removed
     if (prevProps.applications !== this.props.applications) {
       const removedApplications = prevProps.applications.filter(
-        app => !this.props.applications.find(app2 => app.get('applicationId') === app2.get('applicationId'))
+        app =>
+          !this.props.applications.find(
+            app2 => app.get('applicationId') === app2.get('applicationId')
+          )
       );
       this.setState(({ iconRefs }) => {
         removedApplications.forEach(app => {
@@ -165,6 +181,12 @@ class DockImpl extends React.PureComponent {
         });
         return { iconRefs: { ...iconRefs } };
       });
+    }
+  }
+
+  componentDidMount() {
+    if (this.props.createdDefaultApps) {
+      log.debug(`createdDefaultApps: ${this.props.createdDefaultApps}`);
     }
   }
 
@@ -177,12 +199,12 @@ class DockImpl extends React.PureComponent {
     this.setState({
       iconRefs: {
         ...this.state.iconRefs,
-        [applicationId]: el,
-      },
+        [applicationId]: el
+      }
     });
-  })
+  });
 
-  scrollToHighlightedItemComponent = (el) => {
+  scrollToHighlightedItemComponent = el => {
     if (this.shouldScrollToHighlightedItemComponent) {
       const item = findDOMNode(el);
       if (item) {
@@ -196,12 +218,12 @@ class DockImpl extends React.PureComponent {
           behavior: 'smooth',
           scrollMode: 'if-needed',
           block: 'nearest',
-          inline: 'nearest',
+          inline: 'nearest'
         });
         this.shouldScrollToHighlightedItemComponent = false;
       }
     }
-  }
+  };
 
   stopCycling = () => {
     if (this.state.activeCyclingTabId) {
@@ -220,11 +242,11 @@ class DockImpl extends React.PureComponent {
         this.setState({ overIcon: false });
       }, 150);
     }
-  })
+  });
 
-  onDraggingStateChange = (isDragging) => {
+  onDraggingStateChange = isDragging => {
     this.setState({ isDraggingIcon: isDragging });
-  }
+  };
 
   onSubdockOverStateChange(isOver) {
     clearTimeout(this.timeoutSubdock);
@@ -247,11 +269,13 @@ class DockImpl extends React.PureComponent {
    * the scroll is implemented at `<Dock />` level and not at
    * `<DockIcon />` level.
    */
-  onApplicationInstalled = (applicationId) => {
+  onApplicationInstalled = applicationId => {
     // adding the application to `recentlyInstalledApplicationIds` will trigger
     // the addition of `dramaticEnter` props on `DockIcon`
     this.setState(({ recentlyInstalledApplicationIds }) => ({
-      recentlyInstalledApplicationIds: recentlyInstalledApplicationIds.concat(applicationId)
+      recentlyInstalledApplicationIds: recentlyInstalledApplicationIds.concat(
+        applicationId
+      )
     }));
 
     // let's scroll to the installed application
@@ -264,26 +288,28 @@ class DockImpl extends React.PureComponent {
         behavior: 'smooth',
         scrollMode: 'if-needed',
         block: 'nearest',
-        inline: 'nearest',
+        inline: 'nearest'
       });
     }, 50);
-  }
+  };
 
   onClickOutsideSubdock = () => {
     this.handleHideSubdock();
   };
 
   getSelectedApplicationId() {
-    return this.state.activeCyclingApplicationId || this.props.activeApplicationId;
+    return (
+      this.state.activeCyclingApplicationId || this.props.activeApplicationId
+    );
   }
 
   getNextCyclingApplicationId(applicationId, reverse) {
     const { applications } = this.props;
     const appIds = applications.map(getApplicationId);
     const activeCyclingAppIndex = appIds.indexOf(applicationId);
-    const nextActiveCyclingAppIndex = reverse ?
-      mod(activeCyclingAppIndex - 1, appIds.size) :
-      mod(activeCyclingAppIndex + 1, appIds.size);
+    const nextActiveCyclingAppIndex = reverse
+      ? mod(activeCyclingAppIndex - 1, appIds.size)
+      : mod(activeCyclingAppIndex + 1, appIds.size);
 
     return appIds.get(nextActiveCyclingAppIndex);
   }
@@ -298,9 +324,9 @@ class DockImpl extends React.PureComponent {
       return 0;
     }
 
-    return reverse ?
-      mod(currentIndex - 1, recentItems.length) :
-      mod(currentIndex + 1, recentItems.length);
+    return reverse
+      ? mod(currentIndex - 1, recentItems.length)
+      : mod(currentIndex + 1, recentItems.length);
   }
 
   getCurrentCyclingTabIndex(tabId) {
@@ -308,40 +334,53 @@ class DockImpl extends React.PureComponent {
     return findIndex(propEq('resourceId', tabId), recentItems);
   }
 
-  isSubdockOpen = (state) => state.overIcon || state.overSubDock;
+  isSubdockOpen = state => state.overIcon || state.overSubDock;
 
   isSubdockOpenForApplication(applicationId) {
     // we don't want to show the subdock if we are dragging the subdock
     if (this.state.isDraggingIcon) return false;
 
-    return this.isSubdockOpen(this.state) &&
-      (this.state.applicationId === applicationId
-        || this.props.subdockApplicationId === applicationId);
+    return (
+      this.isSubdockOpen(this.state) &&
+      (this.state.applicationId === applicationId ||
+        this.props.subdockApplicationId === applicationId)
+    );
   }
 
   handleCtrlAltArrow(reverse) {
     const selectedApplicationId = this.getSelectedApplicationId();
-    const nextCyclingApplicationId = this.getNextCyclingApplicationId(selectedApplicationId, reverse);
+    const nextCyclingApplicationId = this.getNextCyclingApplicationId(
+      selectedApplicationId,
+      reverse
+    );
     this.setState({ activeCyclingApplicationId: nextCyclingApplicationId });
   }
 
   handleCtrlAltArrowEnd() {
     const selectedApplicationId = this.getSelectedApplicationId();
-    this.props.changeSelectedApp(selectedApplicationId, 'keyboard_shortcut_ctrl_alt_arrow');
+    this.props.changeSelectedApp(
+      selectedApplicationId,
+      'keyboard_shortcut_ctrl_alt_arrow'
+    );
     this.setState({ activeCyclingApplicationId: null });
   }
 
   handleCtrlTabShortCuts() {
-    const {
-      recentItems,
-      highlightedItemId,
-      bangSearchValue,
-    } = this.props;
+    const { recentItems, highlightedItemId, bangSearchValue } = this.props;
 
     if (this.isBangMounted) {
-      const nextActiveCyclingTabIndex = this.getNextCyclingTabIndex(highlightedItemId, false);
+      const nextActiveCyclingTabIndex = this.getNextCyclingTabIndex(
+        highlightedItemId,
+        false
+      );
       const selectedTab = recentItems[nextActiveCyclingTabIndex];
-      this.props.selectItem(selectedTab, nextActiveCyclingTabIndex, 'quick-ctrl-tab', 'subdock', bangSearchValue);
+      this.props.selectItem(
+        selectedTab,
+        nextActiveCyclingTabIndex,
+        'quick-ctrl-tab',
+        'subdock',
+        bangSearchValue
+      );
     } else {
       const firstItem = prop(0, recentItems);
       if (!firstItem) {
@@ -359,15 +398,29 @@ class DockImpl extends React.PureComponent {
   handleCtrlTabCyclingStep(cyclingCount, reverse) {
     const { activeCyclingTabId } = this.state;
     const { recentItems } = this.props;
-    const nextActiveCyclingTabIndex = this.getNextCyclingTabIndex(activeCyclingTabId, reverse);
+    const nextActiveCyclingTabIndex = this.getNextCyclingTabIndex(
+      activeCyclingTabId,
+      reverse
+    );
     const selectedTab = recentItems[nextActiveCyclingTabIndex];
     const direction = reverse ? 'up' : 'down';
 
     if (!this.isBangMounted) {
       this.props.showPaneViaCtrlTab();
-      this.props.cyclingStep(selectedTab, nextActiveCyclingTabIndex, direction, 'subdock');
+      this.props.cyclingStep(
+        selectedTab,
+        nextActiveCyclingTabIndex,
+        direction,
+        'subdock'
+      );
     } else {
-      this.props.cyclingStep(selectedTab, nextActiveCyclingTabIndex, direction, 'subdock', 'tab-on-held-ctrl');
+      this.props.cyclingStep(
+        selectedTab,
+        nextActiveCyclingTabIndex,
+        direction,
+        'subdock',
+        'tab-on-held-ctrl'
+      );
     }
 
     this.setState({ activeCyclingTabId: selectedTab.resourceId });
@@ -383,16 +436,26 @@ class DockImpl extends React.PureComponent {
 
     const selectedTabIndex = this.getCurrentCyclingTabIndex(activeCyclingTabId);
     if (selectedTabIndex === -1) {
-      logger.notify(new Error(`Cycling ERROR: index cannot be found for tabId '${activeCyclingTabId}'`));
+      logger.notify(
+        new Error(
+          `Cycling ERROR: index cannot be found for tabId '${activeCyclingTabId}'`
+        )
+      );
       return;
     }
     const selectedTab = recentItems[selectedTabIndex];
 
-    this.props.selectItem(selectedTab, selectedTabIndex, 'release-held-ctrl', 'subdock', '');
+    this.props.selectItem(
+      selectedTab,
+      selectedTabIndex,
+      'release-held-ctrl',
+      'subdock',
+      ''
+    );
     this.stopCycling();
   }
 
-  handleBangEscape = (format) => {
+  handleBangEscape = format => {
     this.stopCycling();
     this.props.hidePaneViaEsc(format);
   };
@@ -413,7 +476,10 @@ class DockImpl extends React.PureComponent {
     const { applications } = this.props;
     const appIds = applications.map(app => getApplicationId(app));
     if (appIds.has(index - 1)) {
-      this.props.changeSelectedApp(appIds.get(index - 1), 'keyboard_shortcut_ctrl_num');
+      this.props.changeSelectedApp(
+        appIds.get(index - 1),
+        'keyboard_shortcut_ctrl_num'
+      );
     }
   }
 
@@ -442,33 +508,39 @@ class DockImpl extends React.PureComponent {
   handleSelectItem = (...args) => {
     this.props.selectItem(...args);
     this.stopCycling();
-  }
+  };
 
   handleHideSubdock = () => {
     clearTimeout(this.timeoutIcon);
     clearTimeout(this.timeoutSubdock);
     this.setState({ overSubDock: false, overIcon: false });
-  }
+  };
 
   handleShowRecentSubdock = () => {
     if (!this.isBangMounted) {
       this.props.showRecentSubdock();
       this.props.showPaneViaHover();
     }
-  }
+  };
 
-  handleHideRecentSubdock = (via) => {
+  handleHideRecentSubdock = via => {
     if (this.isBangMounted) {
       this.props.hideRecentSubdock();
       this.props.hidePaneVia(via);
     }
-  }
+  };
 
   render() {
     const {
-      applications, classes, applicationsTabAdded, passwordManagerLinks,
-      recentItems, highlightedItemId, setHighlightedRecentSubdockItemId,
-      isRecentSubdockVisible, cyclingStep,
+      applications,
+      classes,
+      applicationsTabAdded,
+      passwordManagerLinks,
+      recentItems,
+      highlightedItemId,
+      setHighlightedRecentSubdockItemId,
+      isRecentSubdockVisible,
+      cyclingStep
     } = this.props;
 
     return (
@@ -492,41 +564,50 @@ class DockImpl extends React.PureComponent {
         />
 
         <div className={classNames('l-dock__scroll', 'appcues-dock')}>
-          {
-            applications.entrySeq().map(([index, application]) => {
-              const manifestURL = getApplicationManifestURL(application);
-              const applicationId = getApplicationId(application);
-              const passwordManagerLink = passwordManagerLinks.get(applicationId);
-              const passwordManagerLinkLogo = passwordManagerLink ? passwordManagerLink.get('avatar') : '';
-              const tabAdded = applicationsTabAdded ? (applicationsTabAdded.get(applicationId) || false) : false;
-              const logoURL = getApplicationIconURL(application) || passwordManagerLinkLogo;
-              const isInstanceLogoInDockIcon = this.props.getIsInstanceLogoInDock(manifestURL) && logoURL;
-              const isActive = !tabAdded && applicationId === this.getSelectedApplicationId();
+          {applications.entrySeq().map(([index, application]) => {
+            const manifestURL = getApplicationManifestURL(application);
+            const applicationId = getApplicationId(application);
+            const passwordManagerLink = passwordManagerLinks.get(applicationId);
+            const passwordManagerLinkLogo = passwordManagerLink
+              ? passwordManagerLink.get('avatar')
+              : '';
+            const tabAdded = applicationsTabAdded
+              ? applicationsTabAdded.get(applicationId) || false
+              : false;
+            const logoURL =
+              getApplicationIconURL(application) || passwordManagerLinkLogo;
+            const isInstanceLogoInDockIcon =
+              this.props.getIsInstanceLogoInDock(manifestURL) && logoURL;
+            const isActive =
+              !tabAdded && applicationId === this.getSelectedApplicationId();
 
-              return (
-                <DockItem
-                  key={applicationId}
-                  applicationId={applicationId}
-                  active={isActive}
-                  badge={getApplicationBadge(application)}
-                  isInstanceLogoInDockIcon={isInstanceLogoInDockIcon}
-                  logoURL={logoURL}
-                  onOverStateChange={this.onIconOverStateChange(applicationId)}
-                  onClick={this.handleClickDockItem(applicationId)}
-                  index={index}
-                  moveIcon={this.handleMoveIcon}
-                  showSubdock={this.isSubdockOpenForApplication(applicationId)}
-                  manifestURL={manifestURL}
-                  onClickOutsideSubdock={this.onClickOutsideSubdock}
-                  onSubdockOverStateChange={this.onSubdockOverStateChange}
-                  handleHideSubdock={this.handleHideSubdock}
-                  iconRef={this.onIconRef(applicationId, isActive)}
-                  dramaticEnter={this.state.recentlyInstalledApplicationIds.includes(applicationId)}
-                />
-              );
-            })
-          }
-          <DockIconDragLayer onDraggingStateChange={this.onDraggingStateChange} />
+            return (
+              <DockItem
+                key={applicationId}
+                applicationId={applicationId}
+                active={isActive}
+                badge={getApplicationBadge(application)}
+                isInstanceLogoInDockIcon={isInstanceLogoInDockIcon}
+                logoURL={logoURL}
+                onOverStateChange={this.onIconOverStateChange(applicationId)}
+                onClick={this.handleClickDockItem(applicationId)}
+                index={index}
+                moveIcon={this.handleMoveIcon}
+                showSubdock={this.isSubdockOpenForApplication(applicationId)}
+                manifestURL={manifestURL}
+                onClickOutsideSubdock={this.onClickOutsideSubdock}
+                onSubdockOverStateChange={this.onSubdockOverStateChange}
+                handleHideSubdock={this.handleHideSubdock}
+                iconRef={this.onIconRef(applicationId, isActive)}
+                dramaticEnter={this.state.recentlyInstalledApplicationIds.includes(
+                  applicationId
+                )}
+              />
+            );
+          })}
+          <DockIconDragLayer
+            onDraggingStateChange={this.onDraggingStateChange}
+          />
         </div>
 
         <div className={classes.bottomSection}>
@@ -546,9 +627,7 @@ class DockImpl extends React.PureComponent {
           onCtrlAltArrowEnd={this.handleCtrlAltArrowEnd}
           onCtrlNum={this.handleCtrlNum}
         />
-        <OnApplicationInstalled
-          callback={this.onApplicationInstalled}
-        />
+        <OnApplicationInstalled callback={this.onApplicationInstalled} />
       </DockWrapper>
     );
   }
@@ -561,7 +640,7 @@ const Dock = compose(
     })
   }),
   connect(
-    (state) => ({
+    state => ({
       applications: getApplicationsForDock(state),
       activeApplicationId: getActiveApplicationId(state),
       highlightedItemId: getUIRecentSubdockHighlightedItemId(state),
@@ -575,29 +654,42 @@ const Dock = compose(
       applicationsTabAdded: getUILeftDockApplicationTabAdded(state),
       keyAboveTab: getKeyAboveTab(state),
       isSettingsVisible: getUISettingsIsVisible(state),
-      getIsInstanceLogoInDock: (manifestURL) => getIsApplicationInstanceLogoInDock(state, manifestURL),
+      getIsInstanceLogoInDock: manifestURL =>
+        getIsApplicationInstanceLogoInDock(state, manifestURL),
+      createdDefaultApps: mustBeCreateDefaultApps(state)
     }),
-    (dispatch) => bindActionCreators({
-      changeSelectedApp,
-      ...appActions,
-      changeTabPositionIndex: dockActions.changeAppItemPosition,
-      onOverStateChange: (applicationId) => setSubdockApplication(applicationId),
-      showRecentSubdock: () => updateUI('recentSubdock', 'isVisible', true),
-      hideRecentSubdock: () => updateUI('recentSubdock', 'isVisible', false),
-      showPaneViaCtrlTab: () => setVisibility('subdock', true, 'held-ctrl-tab'),
-      hidePaneViaCtrlTab: () => setVisibility('subdock', false, 'release-held-ctrl'),
-      showPaneViaHover: () => setVisibility('subdock', true, 'recent-dock-icon-hover'),
-      hidePaneVia: (via) => setVisibility('subdock', false, via),
-      hidePaneViaEsc: (format) => setVisibility(format, false, 'keyboard-esc'),
-      selectItem: selectBangItem,
-      cyclingStep: bangCyclingStep,
-      focusWebview: () => executeWebviewMethodForCurrentTab('focus'),
-      blurWebview: () => executeWebviewMethodForCurrentTab('blur'),
-      openProcessManager: () => openProcessManager(),
-      closeSettings: () => updateUI('settings', 'isVisible', false),
-      setHighlightedRecentSubdockItemId: (id) => updateUI('recentSubdock', 'highlightedItemId', id),
-    }, dispatch)
-  ),
+    dispatch =>
+      bindActionCreators(
+        {
+          changeSelectedApp,
+          ...appActions,
+          changeTabPositionIndex: dockActions.changeAppItemPosition,
+          onOverStateChange: applicationId =>
+            setSubdockApplication(applicationId),
+          showRecentSubdock: () => updateUI('recentSubdock', 'isVisible', true),
+          hideRecentSubdock: () =>
+            updateUI('recentSubdock', 'isVisible', false),
+          showPaneViaCtrlTab: () =>
+            setVisibility('subdock', true, 'held-ctrl-tab'),
+          hidePaneViaCtrlTab: () =>
+            setVisibility('subdock', false, 'release-held-ctrl'),
+          showPaneViaHover: () =>
+            setVisibility('subdock', true, 'recent-dock-icon-hover'),
+          hidePaneVia: via => setVisibility('subdock', false, via),
+          hidePaneViaEsc: format =>
+            setVisibility(format, false, 'keyboard-esc'),
+          selectItem: selectBangItem,
+          cyclingStep: bangCyclingStep,
+          focusWebview: () => executeWebviewMethodForCurrentTab('focus'),
+          blurWebview: () => executeWebviewMethodForCurrentTab('blur'),
+          openProcessManager: () => openProcessManager(),
+          closeSettings: () => updateUI('settings', 'isVisible', false),
+          setHighlightedRecentSubdockItemId: id =>
+            updateUI('recentSubdock', 'highlightedItemId', id)
+        },
+        dispatch
+      )
+  )
 )(DockImpl);
 
 export default Dock;

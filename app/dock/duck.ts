@@ -12,40 +12,49 @@ export const ADD_APP_ITEM = 'browserX/dock/ADD_APP_ITEM';
 export type ADD_APP_ITEM = 'browserX/dock/ADD_APP_ITEM';
 export const REMOVE_APP_ITEM = 'browserX/dock/REMOVE_APP_ITEM';
 export type REMOVE_APP_ITEM = 'browserX/dock/REMOVE_APP_ITEM';
-export const CHANGE_APP_ITEM_POSITION = 'browserX/dock/CHANGE_APP_ITEM_POSITION';
+export const CHANGE_APP_ITEM_POSITION =
+  'browserX/dock/CHANGE_APP_ITEM_POSITION';
 export type CHANGE_APP_ITEM_POSITION = 'browserX/dock/CHANGE_APP_ITEM_POSITION';
 
 // Actions Types
-export type addAppItem = { type: ADD_APP_ITEM, applicationId: string };
-export type removeAppItem = { type: REMOVE_APP_ITEM, applicationId: string };
-export type changeAppItemPosition = { type: CHANGE_APP_ITEM_POSITION, applicationId: string, index: number };
-export type DockActions =
-  addAppItem
-  | removeAppItem
-  | changeAppItemPosition;
+export type addAppItem = { type: ADD_APP_ITEM; applicationId: string };
+export type removeAppItem = { type: REMOVE_APP_ITEM; applicationId: string };
+export type changeAppItemPosition = {
+  type: CHANGE_APP_ITEM_POSITION;
+  applicationId: string;
+  index: number;
+};
+
+export type DockActions = addAppItem | removeAppItem | changeAppItemPosition;
 
 // Action creators
 export const addAppItem = (applicationId: string) => ({
   type: ADD_APP_ITEM,
-  applicationId,
+  applicationId
 });
 export const removeAppItem = (applicationId: string) => ({
   type: REMOVE_APP_ITEM,
-  applicationId,
+  applicationId
 });
-export const changeAppItemPosition = (applicationId: string, index: number) => ({
+export const changeAppItemPosition = (
+  applicationId: string,
+  index: number
+) => ({
   type: CHANGE_APP_ITEM_POSITION,
   applicationId,
-  index,
+  index
 });
 
 // Reducer
-export default function reducer(state: StationDockImmutable = Immutable.List() as any, action: DockActions): StationDockImmutable {
+export default function reducer(
+  state: StationDockImmutable = Immutable.List() as any,
+  action: DockActions
+): StationDockImmutable {
   switch (action.type) {
     case ADD_APP_ITEM:
-      return state.includes(action.applicationId) ?
-        state :
-        state.push(action.applicationId) as StationDockImmutable;
+      return state.includes(action.applicationId)
+        ? state
+        : (state.push(action.applicationId) as StationDockImmutable);
 
     case REMOVE_APP_ITEM: {
       const index = state.indexOf(action.applicationId);

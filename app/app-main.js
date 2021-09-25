@@ -28,7 +28,9 @@ export default class BrowserXAppMain extends EventEmitter {
   // eslint-disable-next-line class-methods-use-this
   async initProcessManagerAnalytics() {
     const onWillKillProcess = ({ pid }) => {
-      const wc = webContents.getAllWebContents().find(w => w.getOSProcessId() === pid);
+      const wc = webContents
+        .getAllWebContents()
+        .find(w => w.getOSProcessId() === pid);
       if (!wc) return;
 
       const url = parse(wc.getURL());

@@ -8,43 +8,43 @@ export enum Steps {
   AppData = 'logo-url-form',
   Confirmation = 'confirmation-message',
   Exit = 'exit',
-  LegacyBxApiApp = 'legacy-bx-api-app-modal',
+  LegacyBxApiApp = 'legacy-bx-api-app-modal'
 }
 
 export enum Visibility {
   Private = 'USER_EMAIL',
-  Public = 'PUBLIC',
+  Public = 'PUBLIC'
 }
 
 export type AppRequestData = {
-  name: string,
-  themeColor: string,
-  logoURL: string,
-  signinURL: string,
-  scope: string,
-  visibility: Visibility,
+  name: string;
+  themeColor: string;
+  logoURL: string;
+  signinURL: string;
+  scope: string;
+  visibility: Visibility;
 };
 
 export enum ApiResponse {
   Error,
   Pending,
-  Done,
+  Done
 }
 
 export type ApplicationCreated = {
-  id: string,
-  bxAppManifestURL: string,
+  id: string;
+  bxAppManifestURL: string;
 };
 
 // State
 export type AppRequest = {
-  apiResponse?: ApiResponse,
-  applicationCreated?: ApplicationCreated,
+  apiResponse?: ApiResponse;
+  applicationCreated?: ApplicationCreated;
 };
 
 const defaultState: AppRequest = {
   apiResponse: undefined,
-  applicationCreated: undefined,
+  applicationCreated: undefined
 };
 
 // Constants
@@ -62,31 +62,43 @@ export type SubmitAppRequestAction = Action<SUBMIT_APP_REQUEST, AppRequestData>;
 
 export type ApiResponseAction = Action<API_RESPONSE, { response: ApiResponse }>;
 
-export type ApplicationCreatedAction = Action<APPLICATION_CREATED, { applicationCreated: ApplicationCreated }>;
+export type ApplicationCreatedAction = Action<
+  APPLICATION_CREATED,
+  { applicationCreated: ApplicationCreated }
+>;
+
+export type DefaultAppsAction = Action<CREATE_DEFAULT_APPS, DefaultAppsData>;
 
 export type AppRequestActions =
-  SubmitAppRequestAction |
-  ApiResponseAction |
-  ApplicationCreatedAction;
+  | SubmitAppRequestAction
+  | ApiResponseAction
+  | ApplicationCreatedAction;
 
 // Action Creators
-export const submitAppRequest = (request: AppRequestData): SubmitAppRequestAction => ({
+export const submitAppRequest = (
+  request: AppRequestData
+): SubmitAppRequestAction => ({
   type: SUBMIT_APP_REQUEST,
-  ...request,
+  ...request
 });
 
 export const setApiResponse = (response: ApiResponse): ApiResponseAction => ({
   type: API_RESPONSE,
-  response,
+  response
 });
 
-export const setApplicationCreated = (applicationCreated: ApplicationCreated): ApplicationCreatedAction => ({
+export const setApplicationCreated = (
+  applicationCreated: ApplicationCreated
+): ApplicationCreatedAction => ({
   type: APPLICATION_CREATED,
-  applicationCreated,
+  applicationCreated
 });
 
 // Reducer
-export default function reducer(state: AppRequest = defaultState, action: AppRequestActions) {
+export default function reducer(
+  state: AppRequest = defaultState,
+  action: AppRequestActions
+) {
   switch (action.type) {
     case SUBMIT_APP_REQUEST: {
       return state;
